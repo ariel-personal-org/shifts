@@ -11,10 +11,10 @@ if (!connectionString) {
 }
 
 // For migrations/scripts, use a single connection
-const migrationClient = postgres(connectionString, { max: 1 });
+const migrationClient = postgres(connectionString, { max: 1, prepare: false });
 
 // For the app, use a pooled connection
-const queryClient = postgres(connectionString);
+const queryClient = postgres(connectionString, { prepare: false });
 
 export const db = drizzle(queryClient, { schema });
 export const migrationDb = drizzle(migrationClient, { schema });
