@@ -252,6 +252,118 @@ router.delete('/:id/members/:userId', requireAuth, requireAdmin, async (req: Aut
   }
 });
 
+// PATCH /api/schedules/:id/advanced
+router.patch('/:id/advanced', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const schema = z.object({
+      cycle_start_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      shift_duration_hours: z.number().int().positive().optional(),
+    });
+    const updates = schema.parse(req.body);
+
+    if (!updates.cycle_start_time && !updates.shift_duration_hours) {
+      return res.status(400).json({ error: 'No changes provided' });
+    }
+
+    const [existing] = await db.select().from(schedules).where(eq(schedules.id, id));
+    if (!existing) return res.status(404).json({ error: 'Schedule not found' });
+
+    const newStartTime = updates.cycle_start_time ?? existing.cycle_start_time;
+    const newDuration = updates.shift_duration_hours ?? existing.shift_duration_hours;
+
+    const newShiftTemplates = generateShifts(
+      existing.start_date,
+      existing.end_date,
+      newStartTime,
+      newDuration,
+      existing.timezone
+    );
+
+    const oldShifts = await db
+      .select()
+      .from(shifts)
+      .where(eq(shifts.schedule_id, id))
+      .orderBy(shifts.index);
+
+    const members = await db
+      .select({ user_id: scheduleMembers.user_id })
+      .from(scheduleMembers)
+      .where(eq(scheduleMembers.schedule_id, id));
+
+    await db.transaction(async (tx) => {
+      // Update existing shifts in-place (preserves shift IDs → all shift_users/requests survive)
+      const updateCount = Math.min(oldShifts.length, newShiftTemplates.length);
+      for (let i = 0; i < updateCount; i++) {
+        await tx
+          .update(shifts)
+          .set({
+            start_datetime: newShiftTemplates[i].start_datetime,
+            end_datetime: newShiftTemplates[i].end_datetime,
+            index: newShiftTemplates[i].index,
+          })
+          .where(eq(shifts.id, oldShifts[i].id));
+      }
+
+      // Insert new shifts (when duration shortened → more shifts fit)
+      for (let i = oldShifts.length; i < newShiftTemplates.length; i++) {
+        const [inserted] = await tx
+          .insert(shifts)
+          .values({
+            schedule_id: id,
+            start_datetime: newShiftTemplates[i].start_datetime,
+            end_datetime: newShiftTemplates[i].end_datetime,
+            index: newShiftTemplates[i].index,
+          })
+          .returning();
+
+        if (members.length > 0) {
+          await tx
+            .insert(shiftUsers)
+            .values(members.map((m) => ({ shift_id: inserted.id, user_id: m.user_id, state: 'available' as const })))
+            .onConflictDoNothing();
+        }
+      }
+
+      // Delete excess shifts (when duration lengthened → fewer shifts fit)
+      // Cascade handles shift_users and home_request_shifts
+      if (oldShifts.length > newShiftTemplates.length) {
+        const excessIds = oldShifts.slice(newShiftTemplates.length).map((s) => s.id);
+        await tx.delete(shifts).where(inArray(shifts.id, excessIds));
+      }
+
+      // Update schedule metadata
+      await tx.update(schedules).set(updates).where(eq(schedules.id, id));
+    });
+
+    await createAuditLog({
+      actor_user_id: req.user!.id,
+      schedule_id: id,
+      action: 'schedule_advanced_updated',
+      old_value: { cycle_start_time: existing.cycle_start_time, shift_duration_hours: existing.shift_duration_hours },
+      new_value: updates,
+    });
+
+    const [updatedRow] = await db
+      .select({ schedule: schedules, primaryTeam: teams })
+      .from(schedules)
+      .leftJoin(teams, eq(schedules.primary_team_id, teams.id))
+      .where(eq(schedules.id, id));
+
+    const updatedShifts = await db
+      .select()
+      .from(shifts)
+      .where(eq(shifts.schedule_id, id))
+      .orderBy(shifts.index);
+
+    return res.json({ schedule: { ...updatedRow.schedule, primary_team: updatedRow.primaryTeam }, shifts: updatedShifts });
+  } catch (err: any) {
+    if (err.name === 'ZodError') return res.status(400).json({ error: err.errors });
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/schedules/:id/grid
 router.get('/:id/grid', requireAuth, async (req: AuthRequest, res) => {
   try {

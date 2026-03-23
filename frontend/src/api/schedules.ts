@@ -59,6 +59,13 @@ export const schedulesApi = {
     );
     return data;
   },
+  advancedUpdate: async (
+    id: number,
+    updates: { cycle_start_time?: string; shift_duration_hours?: number }
+  ): Promise<{ schedule: Schedule; shifts: Shift[] }> => {
+    const { data } = await api.patch(`/api/schedules/${id}/advanced`, updates);
+    return data;
+  },
   autoFill: async (
     scheduleId: number
   ): Promise<{

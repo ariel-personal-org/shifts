@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
+import type { GridData } from '../../types';
 import { schedulesApi } from '../../api/schedules';
 import { usersApi } from '../../api/users';
 import ScheduleGrid from '../../components/ScheduleGrid';
+import AdvancedScheduleModal from '../../components/AdvancedScheduleModal';
 
 export default function ScheduleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,7 @@ export default function ScheduleDetail() {
   const [editName, setEditName] = useState('');
   const [editCapacity, setEditCapacity] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const { data: grid, isLoading } = useQuery({
     queryKey: ['grid', scheduleId],
@@ -52,6 +55,18 @@ export default function ScheduleDetail() {
       queryClient.invalidateQueries({ queryKey: ['grid', scheduleId] });
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
       setIsEditing(false);
+    },
+  });
+
+  const advancedMutation = useMutation({
+    mutationFn: (updates: { cycle_start_time?: string; shift_duration_hours?: number }) =>
+      schedulesApi.advancedUpdate(scheduleId, updates),
+    onSuccess: (result) => {
+      queryClient.setQueryData(['grid', scheduleId], (old: GridData | undefined) =>
+        old ? { ...old, schedule: result.schedule, shifts: result.shifts } : old
+      );
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      setShowAdvanced(false);
     },
   });
 
@@ -114,6 +129,7 @@ export default function ScheduleDetail() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{schedule.name}</h1>
               <button className="btn-secondary btn-sm" onClick={startEdit}>Edit</button>
+              <button className="btn-secondary btn-sm" onClick={() => setShowAdvanced(true)}>Advanced…</button>
             </div>
           )}
           <p className="text-sm text-gray-500 mt-1">
@@ -153,6 +169,16 @@ export default function ScheduleDetail() {
         <div className="card p-8 text-center text-gray-500">No shifts generated.</div>
       ) : (
         <ScheduleGrid data={grid} isAdminView />
+      )}
+
+      {showAdvanced && (
+        <AdvancedScheduleModal
+          schedule={schedule}
+          grid={grid}
+          onClose={() => setShowAdvanced(false)}
+          onSave={(updates) => advancedMutation.mutate(updates)}
+          isSaving={advancedMutation.isPending}
+        />
       )}
 
       {/* Member management */}
