@@ -11,8 +11,6 @@ interface ScheduleGridProps {
   isAdminView?: boolean;
 }
 
-const STATE_OPTIONS: ShiftState[] = ['in_shift', 'available', 'home'];
-
 function ShiftHeader({ shift, inShiftCount, capacity }: { shift: Shift; inShiftCount: number; capacity: number }) {
   const start = parseISO(shift.start_datetime);
   const end = parseISO(shift.end_datetime);
@@ -65,9 +63,11 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editingCell, setEditingCell] = useState<string | null>(null);
-  const [pendingState, setPendingState] = useState<Record<string, ShiftState>>({});
-  const [saving, setSaving] = useState<string | null>(null);
+  // key: "shiftId:userId" → staged new state
+  const [pendingChanges, setPendingChanges] = useState<Record<string, ShiftState>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [warning, setWarning] = useState<{
+    key: string;
     memberId: number;
     shiftId: number;
     state: ShiftState;
@@ -75,52 +75,57 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
   } | null>(null);
 
   const { schedule, shifts, members, shift_stats } = data;
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   const getStatFor = (shiftId: number) =>
     shift_stats.find((s) => s.shift_id === shiftId) ?? { in_shift_count: 0, capacity: schedule.capacity };
 
-  const handleCellClick = (member: MemberRow, shift: Shift, currentState: ShiftState, hasPending: boolean) => {
-    if (!isAdminView) return;
-    const key = `${shift.id}:${member.user.id}`;
-    setEditingCell(key);
+  const stageChange = (key: string, newState: ShiftState) => {
+    setPendingChanges((prev) => ({ ...prev, [key]: newState }));
+    setEditingCell(null);
   };
 
-  const handleStateChange = async (
-    member: MemberRow,
-    shift: Shift,
-    newState: ShiftState,
-    hasPending: boolean
-  ) => {
+  const handleStateSelect = (member: MemberRow, shift: Shift, newState: ShiftState, hasPending: boolean) => {
+    const key = `${shift.id}:${member.user.id}`;
     if (newState === 'in_shift' && hasPending) {
-      setWarning({ memberId: member.user.id, shiftId: shift.id, state: newState, memberName: member.user.name });
+      setWarning({ key, memberId: member.user.id, shiftId: shift.id, state: newState, memberName: member.user.name });
       setEditingCell(null);
       return;
     }
-    await doStateChange(member.user.id, shift.id, newState);
+    stageChange(key, newState);
   };
 
-  const doStateChange = async (userId: number, shiftId: number, state: ShiftState) => {
-    const key = `${shiftId}:${userId}`;
-    setSaving(key);
-    setEditingCell(null);
-    try {
-      await schedulesApi.setShiftState(schedule.id, shiftId, userId, state);
-      await queryClient.invalidateQueries({ queryKey: ['grid', schedule.id] });
-    } catch (err) {
-      console.error('Failed to update state', err);
-    } finally {
-      setSaving(null);
-    }
-  };
-
-  const confirmWarning = async () => {
+  const confirmWarning = () => {
     if (!warning) return;
-    await doStateChange(warning.memberId, warning.shiftId, warning.state);
+    stageChange(warning.key, warning.state);
     setWarning(null);
   };
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await Promise.all(
+        Object.entries(pendingChanges).map(([key, state]) => {
+          const [shiftId, userId] = key.split(':').map(Number);
+          return schedulesApi.setShiftState(schedule.id, shiftId, userId, state);
+        })
+      );
+      setPendingChanges({});
+      await queryClient.invalidateQueries({ queryKey: ['grid', schedule.id] });
+    } catch (err) {
+      console.error('Failed to save changes', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDiscard = () => {
+    setPendingChanges({});
+    setEditingCell(null);
+  };
+
   return (
-    <div className="relative">
+    <div className="relative space-y-3">
       {/* Warning modal */}
       {warning && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -131,8 +136,25 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
             </p>
             <div className="flex gap-3 justify-end">
               <button className="btn-secondary" onClick={() => setWarning(null)}>Cancel</button>
-              <button className="btn-primary" onClick={confirmWarning}>Assign Anyway</button>
+              <button className="btn-primary" onClick={confirmWarning}>Stage Anyway</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save / Discard bar */}
+      {isAdminView && hasPendingChanges && (
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <span className="text-sm text-amber-800 font-medium">
+            {Object.keys(pendingChanges).length} unsaved change{Object.keys(pendingChanges).length !== 1 ? 's' : ''}
+          </span>
+          <div className="flex gap-2">
+            <button className="btn-secondary btn-sm" onClick={handleDiscard} disabled={isSaving}>
+              Discard
+            </button>
+            <button className="btn-primary btn-sm" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving…' : 'Save Changes'}
+            </button>
           </div>
         </div>
       )}
@@ -142,7 +164,6 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              {/* Sticky name column header */}
               <th className="sticky left-0 z-20 bg-gray-50 border-r border-gray-200 min-w-[140px] max-w-[140px] px-2 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Member
               </th>
@@ -201,10 +222,12 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                     {/* Shift state cells */}
                     {shifts.map((shift) => {
                       const stateObj = member.states.find((s) => s.shift_id === shift.id);
-                      const state = stateObj?.state ?? 'available';
+                      const savedState = stateObj?.state ?? 'available';
                       const hasPending = stateObj?.has_pending_request ?? false;
                       const cellKey = `${shift.id}:${member.user.id}`;
-                      const isSaving = saving === cellKey;
+                      const pendingState = pendingChanges[cellKey];
+                      const displayState = pendingState ?? savedState;
+                      const isDirty = pendingState !== undefined;
                       const isEditing = editingCell === cellKey;
                       const isTodayShift = isToday(parseISO(shift.start_datetime));
 
@@ -218,10 +241,10 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                               <select
                                 autoFocus
                                 className="w-full text-xs border border-blue-400 rounded-lg p-1 bg-white shadow-md"
-                                defaultValue={state}
+                                defaultValue={displayState}
                                 onBlur={() => setEditingCell(null)}
                                 onChange={(e) => {
-                                  handleStateChange(member, shift, e.target.value as ShiftState, hasPending);
+                                  handleStateSelect(member, shift, e.target.value as ShiftState, hasPending);
                                 }}
                               >
                                 <option value="in_shift">In Shift</option>
@@ -230,13 +253,15 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                               </select>
                             </div>
                           ) : (
-                            <ShiftCell
-                              state={isSaving ? state : state}
-                              hasPendingRequest={hasPending}
-                              isAdmin={isAdminView}
-                              onClick={() => handleCellClick(member, shift, state, hasPending)}
-                              disabled={isSaving}
-                            />
+                            <div className={isDirty ? 'ring-2 ring-amber-400 ring-dashed rounded-lg' : ''}>
+                              <ShiftCell
+                                state={displayState}
+                                hasPendingRequest={hasPending}
+                                isAdmin={isAdminView}
+                                onClick={() => isAdminView && setEditingCell(cellKey)}
+                                disabled={isSaving}
+                              />
+                            </div>
                           )}
                         </td>
                       );

@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { format, isToday, parseISO, isAfter, isBefore } from 'date-fns';
+import { format, isToday, parseISO, isBefore } from 'date-fns';
 import { schedulesApi } from '../api/schedules';
 import { useAuth } from '../context/AuthContext';
 import type { Schedule } from '../types';
 
-function TodayCard({ schedule }: { schedule: Schedule }) {
+function TodayCard({ schedule, scheduleUrl }: { schedule: Schedule; scheduleUrl: string }) {
   const { data: grid } = useQuery({
     queryKey: ['grid', schedule.id],
     queryFn: () => schedulesApi.getGrid(schedule.id),
@@ -24,7 +24,7 @@ function TodayCard({ schedule }: { schedule: Schedule }) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-gray-900">{schedule.name}</h3>
         <Link
-          to={`/schedules/${schedule.id}`}
+          to={scheduleUrl}
           className="text-xs text-blue-600 hover:underline"
         >
           View full schedule →
@@ -111,7 +111,11 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Today</h2>
           <div className="grid gap-4">
             {activeSchedules.map((s) => (
-              <TodayCard key={s.id} schedule={s} />
+              <TodayCard
+                key={s.id}
+                schedule={s}
+                scheduleUrl={user?.is_admin ? `/admin/schedules/${s.id}` : `/schedules/${s.id}`}
+              />
             ))}
           </div>
         </section>
@@ -124,7 +128,7 @@ export default function Dashboard() {
           {activeSchedules.slice(0, 4).map((s) => (
             <Link
               key={s.id}
-              to={`/schedules/${s.id}`}
+              to={user?.is_admin ? `/admin/schedules/${s.id}` : `/schedules/${s.id}`}
               className="card p-4 hover:shadow-md transition-shadow text-center"
             >
               <div className="text-blue-600 font-semibold text-sm truncate">{s.name}</div>

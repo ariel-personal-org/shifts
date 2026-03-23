@@ -66,7 +66,7 @@ export default function ScheduleView() {
       {grid.shifts.length === 0 ? (
         <div className="card p-8 text-center text-gray-500">No shifts generated for this schedule.</div>
       ) : (
-        <ScheduleGrid data={grid} isAdminView={false} />
+        <ScheduleGrid data={grid} isAdminView={!!user?.is_admin} />
       )}
 
       {/* Legend */}
