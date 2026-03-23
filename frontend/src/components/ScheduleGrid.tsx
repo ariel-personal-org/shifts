@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 interface ScheduleGridProps {
   data: GridData;
   isAdminView?: boolean;
+  scrollRef?: React.RefObject<HTMLDivElement>;
 }
 
 const STATE_LABELS: Record<ShiftState, string> = {
@@ -95,7 +96,7 @@ function MemberLabel({
   );
 }
 
-export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGridProps) {
+export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: ScheduleGridProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -320,7 +321,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
       )}
 
       {/* Scrollable grid */}
-      <div className="overflow-auto rounded-xl border border-gray-200 shadow-sm">
+      <div ref={scrollRef} className="overflow-auto rounded-xl border border-gray-200 shadow-sm">
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

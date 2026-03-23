@@ -36,7 +36,7 @@ function LogRow({ log }: { log: AuditLog }) {
         )}
       </div>
       {expanded && (
-        <div className="mt-2 ml-39 grid grid-cols-2 gap-2 text-xs">
+        <div className="mt-2 sm:ml-[9.75rem] grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           {!!log.old_value_json && (
             <div className="bg-red-50 rounded p-2">
               <div className="text-gray-500 mb-1 font-medium">Before</div>

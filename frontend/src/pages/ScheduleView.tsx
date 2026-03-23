@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
@@ -9,12 +10,27 @@ export default function ScheduleView() {
   const { id } = useParams<{ id: string }>();
   const scheduleId = parseInt(id!);
   const { user } = useAuth();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   const { data: grid, isLoading, error } = useQuery({
     queryKey: ['grid', scheduleId],
     queryFn: () => schedulesApi.getGrid(scheduleId),
     refetchInterval: 60_000,
   });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setShowScrollHint(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    check();
+    el.addEventListener('scroll', check);
+    window.addEventListener('resize', check);
+    return () => {
+      el.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [grid]);
 
   if (isLoading) {
     return (
@@ -38,7 +54,7 @@ export default function ScheduleView() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{schedule.name}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -46,7 +62,7 @@ export default function ScheduleView() {
             {' · '}{schedule.shift_duration_hours}h shifts · Capacity: {schedule.capacity}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 sm:flex-shrink-0">
           {myMember && (
             <Link to="/my-requests" className="btn-secondary btn-sm">
               Request Home
@@ -62,15 +78,21 @@ export default function ScheduleView() {
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid with scroll hint */}
       {grid.shifts.length === 0 ? (
         <div className="card p-8 text-center text-gray-500">No shifts generated for this schedule.</div>
       ) : (
-        <ScheduleGrid data={grid} isAdminView={!!user?.is_admin} />
+        <div className="relative">
+          <ScheduleGrid data={grid} isAdminView={!!user?.is_admin} scrollRef={scrollRef} />
+          {/* Right-edge scroll hint — only shown on small screens when content overflows */}
+          {showScrollHint && (
+            <div className="sm:hidden pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white/80 to-transparent rounded-r-xl" />
+          )}
+        </div>
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 mt-2">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-green-200 border border-green-300" />
           In Shift

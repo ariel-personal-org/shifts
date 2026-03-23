@@ -24,8 +24,8 @@ function RequestCard({ request }: { request: HomeRequest }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="card p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className={STATUS_STYLES[request.status]}>{request.status}</span>
           <span className="text-sm text-gray-600">
             {request.shifts.length} shift{request.shifts.length !== 1 ? 's' : ''}
@@ -35,7 +35,7 @@ function RequestCard({ request }: { request: HomeRequest }) {
           </span>
         </div>
         <button
-          className="text-xs text-blue-600 hover:underline"
+          className="text-xs text-blue-600 hover:underline flex-shrink-0"
           onClick={() => setExpanded((e) => !e)}
         >
           {expanded ? 'Hide' : 'Details'}
@@ -45,11 +45,11 @@ function RequestCard({ request }: { request: HomeRequest }) {
       {expanded && (
         <div className="mt-3 space-y-1.5">
           {request.shifts.map((s) => (
-            <div key={s.shift_id} className="flex items-center justify-between text-sm py-1 border-b border-gray-100 last:border-0">
+            <div key={s.shift_id} className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between text-sm py-1 border-b border-gray-100 last:border-0">
               <span className="text-gray-700">
                 {formatInTimeZone(parseISO(s.shift.start_datetime), request.schedule_timezone, 'EEE MMM d, HH:mm')} – {formatInTimeZone(parseISO(s.shift.end_datetime), request.schedule_timezone, 'HH:mm')}
               </span>
-              <span className={DECISION_STYLES[s.decision]}>{s.decision}</span>
+              <span className={`${DECISION_STYLES[s.decision]} self-start sm:self-auto`}>{s.decision}</span>
             </div>
           ))}
         </div>
@@ -116,9 +116,9 @@ export default function MyRequests() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-900">My Home Requests</h1>
-        <button className="btn-primary" onClick={() => setShowForm(true)}>
+        <button className="btn-primary self-start sm:self-auto" onClick={() => setShowForm(true)}>
           + New Request
         </button>
       </div>
