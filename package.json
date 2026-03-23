@@ -2,16 +2,13 @@
   "name": "shifts",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w backend && npm run build -w frontend",
-    "db:migrate": "npm run db:migrate -w backend",
-    "db:seed": "npm run db:seed -w backend",
-    "db:reset": "npm run db:reset -w backend"
+    "dev": "concurrently -k -n backend,frontend -c blue,green \"pnpm -F backend dev\" \"pnpm -F frontend dev\"",
+    "build": "pnpm -F backend build && pnpm -F frontend build",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm -F backend db:migrate",
+    "db:seed": "pnpm -F backend db:seed",
+    "db:reset": "pnpm -F backend db:reset"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
