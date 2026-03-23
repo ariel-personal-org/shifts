@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { isToday, parseISO, isBefore } from 'date-fns';
+import { format, isToday, parseISO, isBefore } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { schedulesApi } from '../api/schedules';
 import { useAuth } from '../context/AuthContext';
