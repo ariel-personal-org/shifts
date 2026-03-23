@@ -27,6 +27,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   is_admin: boolean('is_admin').notNull().default(false),
+  is_virtual: boolean('is_virtual').notNull().default(false),
   team_id: integer('team_id').references(() => teams.id, { onDelete: 'set null' }),
   created_at: timestamp('created_at').notNull().defaultNow(),
 });

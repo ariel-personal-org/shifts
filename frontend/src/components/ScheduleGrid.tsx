@@ -78,6 +78,7 @@ function MemberLabel({
             {member.user.name}
           </span>
           {isMe && <span className="text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0">You</span>}
+          {member.user.is_virtual && <span className="text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0">Virtual</span>}
         </div>
         <div className="flex items-center gap-1 flex-wrap mt-0.5">
           {member.is_fill_in && (

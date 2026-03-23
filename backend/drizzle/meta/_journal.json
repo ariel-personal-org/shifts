@@ -15,6 +15,13 @@
       "when": 1774298621325,
       "tag": "0001_rich_veda",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774303856882,
+      "tag": "0002_grey_northstar",
+      "breakpoints": true
     }
   ]
 }

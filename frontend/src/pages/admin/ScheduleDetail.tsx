@@ -203,7 +203,8 @@ export default function ScheduleDetail() {
                 <div key={u.id} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50">
                   <div>
                     <span className="text-sm font-medium text-gray-900">{u.name}</span>
-                    <span className="text-xs text-gray-400 ml-2">{u.email}</span>
+                    {u.is_virtual && <span className="badge badge-yellow text-[9px] ml-1">Virtual</span>}
+                    {!u.is_virtual && <span className="text-xs text-gray-400 ml-2">{u.email}</span>}
                   </div>
                   {isMember ? (
                     <span className="text-xs text-gray-400">Already a member</span>
@@ -228,7 +229,10 @@ export default function ScheduleDetail() {
             <div key={m.user.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-900">{m.user.name}</span>
-                <span className="text-xs text-gray-400">{m.user.email}</span>
+                {m.user.is_virtual
+                  ? <span className="badge badge-yellow text-[9px]">Virtual</span>
+                  : <span className="text-xs text-gray-400">{m.user.email}</span>
+                }
                 {m.is_fill_in && <span className="badge badge-purple text-[9px]">Fill-in</span>}
               </div>
               <button

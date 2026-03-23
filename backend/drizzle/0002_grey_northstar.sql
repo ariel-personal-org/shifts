@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "is_virtual" boolean DEFAULT false NOT NULL;

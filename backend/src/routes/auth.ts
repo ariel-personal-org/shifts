@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db } from '../db';
 import { users } from '../db/schema';
 import { signToken, requireAuth, AuthRequest } from '../middleware/auth';
+import { isVirtualEmail } from '../utils/virtualUsers';
 
 const router = Router();
 
@@ -35,6 +36,11 @@ router.post('/google', async (req, res) => {
     let [user] = await db.select().from(users).where(eq(users.email, email));
 
     if (!user) {
+      // Reject sentinel virtual emails — they cannot have real Google credentials
+      if (isVirtualEmail(email)) {
+        return res.status(403).json({ error: 'Virtual users cannot log in' });
+      }
+
       // Auto-register new user
       const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase());
       const isAdmin = adminEmails.includes(email.toLowerCase());
@@ -57,6 +63,10 @@ router.post('/google', async (req, res) => {
       }
     }
 
+    if (user.is_virtual) {
+      return res.status(403).json({ error: 'Virtual users cannot log in' });
+    }
+
     const token = signToken(user.id);
     return res.json({ user, token });
   } catch (err: any) {
@@ -76,6 +86,7 @@ router.post('/dev-login', async (req, res) => {
 
   const [user] = await db.select().from(users).where(eq(users.email, email));
   if (!user) return res.status(404).json({ error: 'User not found' });
+  if (user.is_virtual) return res.status(403).json({ error: 'Virtual users cannot log in' });
 
   const token = signToken(user.id);
   return res.json({ user, token });
