@@ -33,12 +33,13 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     const requestId = req.query.request_id as string | undefined;
     const decision = req.query.decision as string | undefined;
 
+    const conditions = [];
     // Non-admins can only see their own requests
-    const targetUserId = req.user!.is_admin && req.query.user_id
-      ? parseInt(req.query.user_id as string)
-      : req.user!.id;
-
-    const conditions = [eq(homeRequestShifts.user_id, targetUserId)];
+    if (!req.user!.is_admin) {
+      conditions.push(eq(homeRequestShifts.user_id, req.user!.id));
+    } else if (req.query.user_id) {
+      conditions.push(eq(homeRequestShifts.user_id, parseInt(req.query.user_id as string)));
+    }
     if (scheduleId) conditions.push(eq(homeRequestShifts.schedule_id, scheduleId));
     if (requestId) conditions.push(eq(homeRequestShifts.request_id, requestId));
     if (decision) conditions.push(eq(homeRequestShifts.decision, decision));
@@ -50,7 +51,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       })
       .from(homeRequestShifts)
       .innerJoin(shifts, eq(homeRequestShifts.shift_id, shifts.id))
-      .where(and(...conditions))
+      .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(homeRequestShifts.created_at);
 
     // Group by request_id
