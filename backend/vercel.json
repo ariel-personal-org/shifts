@@ -1,10 +1,10 @@
 {
   "version": 2,
   "buildCommand": "tsx src/db/migrate.ts",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
