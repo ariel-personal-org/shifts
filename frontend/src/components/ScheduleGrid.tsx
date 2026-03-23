@@ -40,11 +40,12 @@ function ShiftHeader({ shift, inShiftCount, capacity }: { shift: Shift; inShiftC
   );
 }
 
-function MemberLabel({ member }: { member: MemberRow }) {
+function MemberLabel({ member, isMe }: { member: MemberRow; isMe: boolean }) {
   return (
-    <div className={`min-w-[140px] max-w-[140px] px-2 py-1.5 flex flex-col justify-center ${member.is_fill_in ? 'bg-purple-50' : 'bg-white'}`}>
+    <div className={`min-w-[140px] max-w-[140px] px-2 py-1.5 flex flex-col justify-center ${member.is_fill_in ? 'bg-purple-50' : isMe ? 'bg-blue-50' : 'bg-white'}`}>
       <div className="flex items-center gap-1">
-        <span className="text-sm font-medium text-gray-900 truncate">{member.user.name}</span>
+        <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>{member.user.name}</span>
+        {isMe && <span className="text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0">You</span>}
       </div>
       <div className="flex items-center gap-1 flex-wrap mt-0.5">
         {member.is_fill_in && (
@@ -168,6 +169,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                 memberIdx > 0 &&
                 member.is_fill_in &&
                 !members[memberIdx - 1].is_fill_in;
+              const isMe = member.user.id === user?.id;
 
               return (
                 <>
@@ -186,12 +188,14 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                   <tr
                     key={member.user.id}
                     className={`border-b border-gray-100 hover:bg-gray-50/50 ${
-                      member.is_fill_in ? 'bg-purple-50/30' : 'bg-white'
+                      isMe ? 'bg-blue-50/40' : member.is_fill_in ? 'bg-purple-50/30' : 'bg-white'
                     }`}
                   >
                     {/* Sticky name cell */}
-                    <td className={`sticky left-0 z-10 border-r border-gray-200 ${member.is_fill_in ? 'bg-purple-50' : 'bg-white'}`}>
-                      <MemberLabel member={member} />
+                    <td className={`sticky left-0 z-10 border-r border-gray-200 ${
+                      isMe ? 'border-l-2 border-l-blue-400 bg-blue-50' : member.is_fill_in ? 'bg-purple-50' : 'bg-white'
+                    }`}>
+                      <MemberLabel member={member} isMe={isMe} />
                     </td>
 
                     {/* Shift state cells */}
