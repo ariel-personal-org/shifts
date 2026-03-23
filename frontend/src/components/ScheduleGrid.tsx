@@ -18,10 +18,10 @@ const STATE_LABELS: Record<ShiftState, string> = {
 };
 
 function ShiftHeader({
-  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn,
+  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView,
 }: {
   shift: Shift; inShiftCount: number; capacity: number;
-  isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void;
+  isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void; isAdminView: boolean;
 }) {
   const start = parseISO(shift.start_datetime);
   const end = parseISO(shift.end_datetime);
@@ -32,9 +32,9 @@ function ShiftHeader({
   return (
     <div
       className={`min-w-[90px] p-1.5 text-center ${isTodayShift ? 'bg-blue-50' : ''}
-        ${isSelectMode ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
-      onClick={isSelectMode ? onToggleColumn : undefined}
-      title={isSelectMode ? 'Select / deselect entire column' : undefined}
+        ${isAdminView ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
+      onClick={isAdminView ? onToggleColumn : undefined}
+      title={isAdminView ? 'Click to select column' : undefined}
     >
       {isSelectMode && (
         <div className={`w-3.5 h-3.5 rounded border mx-auto mb-0.5 flex items-center justify-center
@@ -320,6 +320,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                       isSelectMode={isSelectMode}
                       allSelected={isColumnAllSelected(shift)}
                       onToggleColumn={() => toggleColumn(shift)}
+                      isAdminView={isAdminView}
                     />
                   </th>
                 );
@@ -403,15 +404,14 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                                 isDirty ? 'ring-2 ring-amber-400 ring-dashed rounded-lg' : '',
                                 isSelected ? 'ring-2 ring-amber-500 rounded-lg bg-amber-50' : '',
                               ].join(' ')}
-                              onClick={isSelectMode ? () => toggleCell(cellKey) : undefined}
+                              onClick={isAdminView ? () => toggleCell(cellKey) : undefined}
+                              onDoubleClick={isAdminView ? () => { setSelectedCells(new Set()); setEditingCell(cellKey); } : undefined}
                             >
                               <ShiftCell
                                 state={displayState}
                                 hasPendingRequest={hasPending}
-                                isAdmin={isAdminView && !isSelectMode}
-                                onClick={
-                                  !isSelectMode ? () => setEditingCell(cellKey) : undefined
-                                }
+                                isAdmin={false}
+                                onClick={undefined}
                                 disabled={isSaving}
                               />
                             </div>
