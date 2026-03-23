@@ -55,18 +55,18 @@ function ShiftHeader({
 }
 
 function MemberLabel({
-  member, isMe, isSelectMode, allSelected, onToggleRow,
+  member, isMe, isSelectMode, allSelected, onToggleRow, isAdminView,
 }: {
   member: MemberRow; isMe: boolean;
-  isSelectMode: boolean; allSelected: boolean; onToggleRow: () => void;
+  isSelectMode: boolean; allSelected: boolean; onToggleRow: () => void; isAdminView: boolean;
 }) {
   return (
     <div
       className={`min-w-[140px] max-w-[140px] px-2 py-1.5 flex items-center gap-1.5
         ${member.is_fill_in ? 'bg-purple-50' : isMe ? 'bg-blue-50' : 'bg-white'}
-        ${isSelectMode ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
-      onClick={isSelectMode ? onToggleRow : undefined}
-      title={isSelectMode ? 'Select / deselect entire row' : undefined}
+        ${isAdminView ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
+      onClick={isAdminView ? onToggleRow : undefined}
+      title={isAdminView ? 'Click to select row' : undefined}
     >
       {isSelectMode && (
         <div className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center
@@ -105,9 +105,9 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
   const [pendingChanges, setPendingChanges] = useState<Record<string, ShiftState>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Select mode state
-  const [isSelectMode, setIsSelectMode] = useState(false);
+  // Select mode — derived from whether any cells are selected
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  const isSelectMode = selectedCells.size > 0;
 
   // Warning modal
   const [warning, setWarning] = useState<{
@@ -166,12 +166,6 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
 
   // ─── Select mode ─────────────────────────────────────────────────────────────
 
-  const toggleSelectMode = () => {
-    setIsSelectMode((v) => !v);
-    setSelectedCells(new Set());
-    setEditingCell(null);
-  };
-
   const toggleCell = (key: string) => {
     setSelectedCells((prev) => {
       const next = new Set(prev);
@@ -181,6 +175,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
   };
 
   const toggleRow = (member: MemberRow) => {
+    setEditingCell(null);
     const keys = shifts.map((s) => `${s.id}:${member.user.id}`);
     const allSelected = keys.every((k) => selectedCells.has(k));
     setSelectedCells((prev) => {
@@ -264,22 +259,10 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
       )}
 
       {/* Toolbar */}
-      {isAdminView && (
+      {isAdminView && (isSelectMode || hasPendingChanges) && (
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Left: select mode toggle */}
-          <button
-            className={`btn-sm flex items-center gap-1.5 ${isSelectMode ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={toggleSelectMode}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            {isSelectMode ? 'Exit Select' : 'Select Mode'}
-          </button>
-
-          {/* Center: bulk action bar (shown when cells are selected) */}
-          {isSelectMode && selectedCells.size > 0 && (
+          {/* Bulk action bar (shown when cells are selected) */}
+          {isSelectMode && (
             <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm">
               <span className="text-xs text-gray-500 font-medium">{selectedCells.size} selected — set to:</span>
               {(['in_shift', 'available', 'home'] as ShiftState[]).map((state) => (
@@ -295,7 +278,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                 className="text-xs text-gray-400 hover:text-gray-600 ml-1"
                 onClick={() => setSelectedCells(new Set())}
               >
-                Clear
+                Cancel
               </button>
             </div>
           )}
@@ -376,6 +359,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                         isSelectMode={isSelectMode}
                         allSelected={isRowAllSelected(member)}
                         onToggleRow={() => toggleRow(member)}
+                        isAdminView={isAdminView}
                       />
                     </td>
 
