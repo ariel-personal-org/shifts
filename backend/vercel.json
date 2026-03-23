@@ -1,4 +1,4 @@
 {
   "version": 2,
-  "buildCommand": "tsx src/db/migrate.ts"
+  "buildCommand": "pnpm run db:migrate"
 }
