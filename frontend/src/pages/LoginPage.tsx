@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,7 @@ import { authApi } from '../api/auth';
 export default function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const [devEmail, setDevEmail] = useState('alice@example.com');
 
   useEffect(() => {
     if (user) navigate('/dashboard', { replace: true });
@@ -63,6 +64,39 @@ export default function LoginPage() {
           <br />
           New users are registered automatically.
         </p>
+
+        {import.meta.env.DEV && (
+          <div className="mt-6 pt-6 border-t border-dashed border-gray-200">
+            <p className="text-xs text-amber-600 font-medium mb-3">Dev login (local only)</p>
+            <div className="flex gap-2">
+              <select
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
+                className="flex-1 text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              >
+                <option value="alice@example.com">Alice (admin)</option>
+                <option value="bob@example.com">Bob</option>
+                <option value="carol@example.com">Carol</option>
+                <option value="dave@example.com">Dave (fill-in)</option>
+                <option value="eva@example.com">Eva</option>
+              </select>
+              <button
+                onClick={async () => {
+                  try {
+                    const { user: u, token } = await authApi.devLogin(devEmail);
+                    login(u, token);
+                    navigate('/dashboard', { replace: true });
+                  } catch {
+                    alert('Dev login failed — run pnpm db:seed first');
+                  }
+                }}
+                className="text-sm bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

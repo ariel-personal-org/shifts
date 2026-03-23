@@ -66,6 +66,21 @@ router.post('/google', async (req, res) => {
   }
 });
 
+// POST /api/auth/dev-login — local dev only, bypasses Google OAuth
+router.post('/dev-login', async (req, res) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  const { email } = req.body as { email?: string };
+  if (!email) return res.status(400).json({ error: 'email required' });
+
+  const [user] = await db.select().from(users).where(eq(users.email, email));
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const token = signToken(user.id);
+  return res.json({ user, token });
+});
+
 // GET /api/auth/me
 router.get('/me', requireAuth, (req: AuthRequest, res) => {
   return res.json({ user: req.user });
