@@ -36,12 +36,11 @@ function ShiftHeader({
       onClick={isAdminView ? onToggleColumn : undefined}
       title={isAdminView ? 'Click to select column' : undefined}
     >
-      {isSelectMode && (
-        <div className={`w-3.5 h-3.5 rounded border mx-auto mb-0.5 flex items-center justify-center
-          ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
-          {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
-        </div>
-      )}
+      <div className={`w-3.5 h-3.5 rounded border mx-auto mb-0.5 flex items-center justify-center transition-opacity
+        ${isSelectMode ? 'opacity-100' : 'opacity-0'}
+        ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
+        {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+      </div>
       <div className="text-[10px] text-gray-500 leading-tight">{format(start, 'MMM d')}</div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
         {format(start, 'HH:mm')}–{format(end, 'HH:mm')}
@@ -68,12 +67,11 @@ function MemberLabel({
       onClick={isAdminView ? onToggleRow : undefined}
       title={isAdminView ? 'Click to select row' : undefined}
     >
-      {isSelectMode && (
-        <div className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center
-          ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
-          {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
-        </div>
-      )}
+      <div className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center transition-opacity
+        ${isSelectMode ? 'opacity-100' : 'opacity-0'}
+        ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
+        {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+      </div>
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1">
           <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
