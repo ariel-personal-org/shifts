@@ -20,6 +20,7 @@ export default function CreateSchedule() {
     shift_duration_hours: 12,
     capacity: 2,
     primary_team_id: 0,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
   const [error, setError] = useState('');

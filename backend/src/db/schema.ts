@@ -43,6 +43,7 @@ export const schedules = pgTable('schedules', {
   primary_team_id: integer('primary_team_id')
     .notNull()
     .references(() => teams.id),
+  timezone: varchar('timezone', { length: 100 }).notNull().default('UTC'),
   created_at: timestamp('created_at').notNull().defaultNow(),
 });
 

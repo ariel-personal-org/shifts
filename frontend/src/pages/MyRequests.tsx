@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { schedulesApi } from '../api/schedules';
 import { homeRequestsApi } from '../api/homeRequests';
 import { useAuth } from '../context/AuthContext';
@@ -46,7 +47,7 @@ function RequestCard({ request }: { request: HomeRequest }) {
           {request.shifts.map((s) => (
             <div key={s.shift_id} className="flex items-center justify-between text-sm py-1 border-b border-gray-100 last:border-0">
               <span className="text-gray-700">
-                {format(parseISO(s.shift.start_datetime), 'EEE MMM d, HH:mm')} – {format(parseISO(s.shift.end_datetime), 'HH:mm')}
+                {formatInTimeZone(parseISO(s.shift.start_datetime), request.schedule_timezone, 'EEE MMM d, HH:mm')} – {formatInTimeZone(parseISO(s.shift.end_datetime), request.schedule_timezone, 'HH:mm')}
               </span>
               <span className={DECISION_STYLES[s.decision]}>{s.decision}</span>
             </div>
@@ -168,8 +169,8 @@ export default function MyRequests() {
                           : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
                       }`}
                     >
-                      <div className="font-medium">{format(parseISO(shift.start_datetime), 'EEE MMM d')}</div>
-                      <div className="text-gray-500">{format(parseISO(shift.start_datetime), 'HH:mm')}–{format(parseISO(shift.end_datetime), 'HH:mm')}</div>
+                      <div className="font-medium">{formatInTimeZone(parseISO(shift.start_datetime), gridData!.schedule.timezone, 'EEE MMM d')}</div>
+                      <div className="text-gray-500">{formatInTimeZone(parseISO(shift.start_datetime), gridData!.schedule.timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), gridData!.schedule.timezone, 'HH:mm')}</div>
                       {hasPending && <div className="text-amber-600 mt-0.5">Already pending</div>}
                     </button>
                   );

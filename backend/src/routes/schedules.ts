@@ -38,6 +38,7 @@ router.post('/', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
       shift_duration_hours: z.number().int().positive(),
       capacity: z.number().int().positive(),
       primary_team_id: z.number().int().positive(),
+      timezone: z.string().min(1).default('UTC'),
     });
     const data = schema.parse(req.body);
 
@@ -48,7 +49,8 @@ router.post('/', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
       data.start_date,
       data.end_date,
       data.cycle_start_time,
-      data.shift_duration_hours
+      data.shift_duration_hours,
+      data.timezone
     );
 
     if (generated.length > 0) {

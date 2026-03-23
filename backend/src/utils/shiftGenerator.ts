@@ -1,4 +1,5 @@
-import { addHours, parseISO, format, isAfter, isBefore, isEqual } from 'date-fns';
+import { addHours, isAfter } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
 
 export interface GeneratedShift {
   start_datetime: Date;
@@ -10,30 +11,23 @@ export function generateShifts(
   startDate: string, // "YYYY-MM-DD"
   endDate: string,   // "YYYY-MM-DD"
   cycleStartTime: string, // "HH:MM"
-  durationHours: number
+  durationHours: number,
+  timezone: string // IANA timezone, e.g. "Asia/Jerusalem"
 ): GeneratedShift[] {
-  const [startHour, startMin] = cycleStartTime.split(':').map(Number);
-
-  // Build first shift start: startDate at cycleStartTime
-  const rangeStart = parseISO(`${startDate}T00:00:00`);
-  const rangeEnd = parseISO(`${endDate}T23:59:59`);
-
-  let shiftStart = new Date(rangeStart);
-  shiftStart.setHours(startHour, startMin, 0, 0);
+  // Convert the cycle start time in the given timezone to UTC
+  let shiftStart = fromZonedTime(`${startDate}T${cycleStartTime}:00`, timezone);
+  const rangeEnd = fromZonedTime(`${endDate}T23:59:59`, timezone);
 
   const result: GeneratedShift[] = [];
   let index = 0;
 
   while (!isAfter(shiftStart, rangeEnd)) {
     const shiftEnd = addHours(shiftStart, durationHours);
-    // Include shift if its start is within the range
-    if (!isAfter(shiftStart, rangeEnd)) {
-      result.push({
-        start_datetime: new Date(shiftStart),
-        end_datetime: new Date(shiftEnd),
-        index,
-      });
-    }
+    result.push({
+      start_datetime: new Date(shiftStart),
+      end_datetime: new Date(shiftEnd),
+      index,
+    });
     shiftStart = shiftEnd;
     index++;
   }

@@ -48,14 +48,16 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       .select({
         hrs: homeRequestShifts,
         shift: shifts,
+        schedule_timezone: schedules.timezone,
       })
       .from(homeRequestShifts)
       .innerJoin(shifts, eq(homeRequestShifts.shift_id, shifts.id))
+      .innerJoin(schedules, eq(homeRequestShifts.schedule_id, schedules.id))
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(homeRequestShifts.created_at);
 
     // Group by request_id
-    const grouped = new Map<string, { request_id: string; user_id: number; schedule_id: number; created_at: Date; shifts: any[]; status: string }>();
+    const grouped = new Map<string, { request_id: string; user_id: number; schedule_id: number; schedule_timezone: string; created_at: Date; shifts: any[]; status: string }>();
     for (const row of rows) {
       const rid = row.hrs.request_id;
       if (!grouped.has(rid)) {
@@ -63,6 +65,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           request_id: rid,
           user_id: row.hrs.user_id,
           schedule_id: row.hrs.schedule_id,
+          schedule_timezone: row.schedule_timezone,
           created_at: row.hrs.created_at,
           shifts: [],
           status: 'pending',

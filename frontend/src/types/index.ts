@@ -22,6 +22,7 @@ export interface Schedule {
   shift_duration_hours: number;
   capacity: number;
   primary_team_id: number;
+  timezone: string;
   created_at: string;
   primary_team?: Team | null;
 }
@@ -76,6 +77,7 @@ export interface HomeRequest {
   request_id: string;
   user_id: number;
   schedule_id: number;
+  schedule_timezone: string;
   created_at: string;
   status: RequestStatus;
   shifts: HomeRequestShiftItem[];

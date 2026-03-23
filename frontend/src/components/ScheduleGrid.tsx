@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { format, isToday, parseISO } from 'date-fns';
+import { isToday, parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import type { GridData, ShiftState, MemberRow, Shift } from '../types';
 import ShiftCell from './ShiftCell';
 import { useAuth } from '../context/AuthContext';
@@ -18,13 +19,12 @@ const STATE_LABELS: Record<ShiftState, string> = {
 };
 
 function ShiftHeader({
-  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView,
+  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView, timezone,
 }: {
   shift: Shift; inShiftCount: number; capacity: number;
-  isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void; isAdminView: boolean;
+  isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void; isAdminView: boolean; timezone: string;
 }) {
   const start = parseISO(shift.start_datetime);
-  const end = parseISO(shift.end_datetime);
   const isTodayShift = isToday(start);
   const isUnder = inShiftCount < capacity;
   const isOver = inShiftCount > capacity;
@@ -41,9 +41,9 @@ function ShiftHeader({
         ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
         {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
       </div>
-      <div className="text-[10px] text-gray-500 leading-tight">{format(start, 'MMM d')}</div>
+      <div className="text-[10px] text-gray-500 leading-tight">{formatInTimeZone(start, timezone, 'MMM d')}</div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
-        {format(start, 'HH:mm')}–{format(end, 'HH:mm')}
+        {formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}
       </div>
       <div className={`mt-0.5 text-[10px] font-semibold px-1 py-0.5 rounded-full inline-block
         ${isOver ? 'bg-blue-100 text-blue-700' : isUnder ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -341,6 +341,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
                       allSelected={isColumnAllSelected(shift)}
                       onToggleColumn={() => toggleColumn(shift)}
                       isAdminView={isAdminView}
+                      timezone={schedule.timezone}
                     />
                   </th>
                 );

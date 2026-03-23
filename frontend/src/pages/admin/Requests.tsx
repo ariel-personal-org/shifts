@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { homeRequestsApi } from '../../api/homeRequests';
 import { schedulesApi } from '../../api/schedules';
 import { usersApi } from '../../api/users';
@@ -63,7 +64,7 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
           {request.shifts.map((s) => (
             <div key={s.shift_id} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
               <div className="text-sm text-gray-700">
-                {format(parseISO(s.shift.start_datetime), 'EEE MMM d, HH:mm')} – {format(parseISO(s.shift.end_datetime), 'HH:mm')}
+                {formatInTimeZone(parseISO(s.shift.start_datetime), request.schedule_timezone, 'EEE MMM d, HH:mm')} – {formatInTimeZone(parseISO(s.shift.end_datetime), request.schedule_timezone, 'HH:mm')}
               </div>
               <div className="flex items-center gap-2">
                 {s.decision !== 'pending' ? (

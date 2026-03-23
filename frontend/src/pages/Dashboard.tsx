@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { format, isToday, parseISO, isBefore } from 'date-fns';
+import { isToday, parseISO, isBefore } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { schedulesApi } from '../api/schedules';
 import { useAuth } from '../context/AuthContext';
 import type { Schedule } from '../types';
@@ -49,7 +50,7 @@ function TodayCard({ schedule, scheduleUrl }: { schedule: Schedule; scheduleUrl:
             <div key={shift.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
               <div>
                 <div className="text-sm font-medium text-gray-800">
-                  {format(parseISO(shift.start_datetime), 'HH:mm')} – {format(parseISO(shift.end_datetime), 'HH:mm')}
+                  {formatInTimeZone(parseISO(shift.start_datetime), grid.schedule.timezone, 'HH:mm')} – {formatInTimeZone(parseISO(shift.end_datetime), grid.schedule.timezone, 'HH:mm')}
                 </div>
                 <div className="text-xs text-gray-500">
                   {stat ? `${stat.in_shift_count}/${stat.capacity} filled` : ''}
