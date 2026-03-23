@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: shifts
       POSTGRES_DB: shifts
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
