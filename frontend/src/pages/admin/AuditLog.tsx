@@ -50,19 +50,19 @@ function LogRow({ log, users, schedules }: { log: AuditLog; users: any[]; schedu
         {schedule?.name ?? (log.schedule_id ? `#${log.schedule_id}` : '—')}
       </td>
       <td className="px-3 py-2">
-        {(log.old_value_json || log.new_value_json) && (
+        {!!(log.old_value_json || log.new_value_json) && (
           <button className="text-xs text-blue-600 hover:underline" onClick={() => setExpanded((e) => !e)}>
             {expanded ? 'Hide' : 'View'}
           </button>
         )}
         {expanded && (
           <div className="mt-1 grid grid-cols-2 gap-1 text-[10px]">
-            {log.old_value_json && (
+            {!!log.old_value_json && (
               <div className="bg-red-50 rounded p-1">
                 <pre className="whitespace-pre-wrap">{JSON.stringify(log.old_value_json, null, 2)}</pre>
               </div>
             )}
-            {log.new_value_json && (
+            {!!log.new_value_json && (
               <div className="bg-green-50 rounded p-1">
                 <pre className="whitespace-pre-wrap">{JSON.stringify(log.new_value_json, null, 2)}</pre>
               </div>

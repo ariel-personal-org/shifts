@@ -31,8 +31,9 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
   }
   const token = header.slice(7);
   try {
-    const payload = jwt.verify(token, getSecret()) as { sub: number };
-    const [user] = await db.select().from(users).where(eq(users.id, payload.sub));
+    const payload = jwt.verify(token, getSecret()) as { sub: string | number };
+    const userId = parseInt(String(payload.sub), 10);
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) return res.status(401).json({ error: 'User not found' });
     req.user = user;
     next();

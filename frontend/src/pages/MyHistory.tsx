@@ -29,7 +29,7 @@ function LogRow({ log }: { log: AuditLog }) {
             {ACTION_LABELS[log.action] ?? log.action}
           </span>
         </div>
-        {(log.old_value_json || log.new_value_json) && (
+        {!!(log.old_value_json || log.new_value_json) && (
           <button className="text-xs text-blue-600 hover:underline" onClick={() => setExpanded(e => !e)}>
             {expanded ? 'Hide' : 'Details'}
           </button>
@@ -37,13 +37,13 @@ function LogRow({ log }: { log: AuditLog }) {
       </div>
       {expanded && (
         <div className="mt-2 ml-39 grid grid-cols-2 gap-2 text-xs">
-          {log.old_value_json && (
+          {!!log.old_value_json && (
             <div className="bg-red-50 rounded p-2">
               <div className="text-gray-500 mb-1 font-medium">Before</div>
               <pre className="text-gray-700 whitespace-pre-wrap">{JSON.stringify(log.old_value_json, null, 2)}</pre>
             </div>
           )}
-          {log.new_value_json && (
+          {!!log.new_value_json && (
             <div className="bg-green-50 rounded p-2">
               <div className="text-gray-500 mb-1 font-medium">After</div>
               <pre className="text-gray-700 whitespace-pre-wrap">{JSON.stringify(log.new_value_json, null, 2)}</pre>
