@@ -6,6 +6,8 @@
     "dev": "concurrently -k -n backend,frontend -c blue,green \"pnpm -F backend dev\" \"pnpm -F frontend dev\"",
     "build": "pnpm -F backend build && pnpm -F frontend build",
     "test": "pnpm -r test",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
     "db:migrate": "pnpm -F backend db:migrate",
     "db:seed": "pnpm -F backend db:seed",
     "db:reset": "pnpm -F backend db:reset"
