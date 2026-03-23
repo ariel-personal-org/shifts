@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { generateShifts, shiftsOverlap } from '../utils/shiftGenerator';
 
+const TZ = 'UTC'; // Use UTC in tests so UTC hours == zoned hours
+
 describe('generateShifts', () => {
   it('generates correct number of shifts for a 2-day range with 12h shifts', () => {
-    const shifts = generateShifts('2024-01-01', '2024-01-02', '09:00', 12);
-    // Day 1: 09:00–21:00, Day 1: 21:00–09:00 (crosses midnight), Day 2: 09:00–21:00
-    // Each shift is 12h, starting at 09:00 day 1
+    const shifts = generateShifts('2024-01-01', '2024-01-02', '09:00', 12, TZ);
     // Shift 0: 09:00–21:00 Jan 1
     // Shift 1: 21:00 Jan 1 – 09:00 Jan 2
     // Shift 2: 09:00–21:00 Jan 2
@@ -14,29 +14,36 @@ describe('generateShifts', () => {
   });
 
   it('generates shifts with correct indices starting at 0', () => {
-    const shifts = generateShifts('2024-01-01', '2024-01-01', '08:00', 8);
+    const shifts = generateShifts('2024-01-01', '2024-01-01', '08:00', 8, TZ);
     shifts.forEach((shift, i) => {
       expect(shift.index).toBe(i);
     });
   });
 
-  it('first shift starts at cycleStartTime on startDate', () => {
-    const shifts = generateShifts('2024-06-15', '2024-06-15', '09:30', 8);
+  it('first shift starts at cycleStartTime on startDate (in given timezone)', () => {
+    const shifts = generateShifts('2024-06-15', '2024-06-15', '09:30', 8, TZ);
     expect(shifts.length).toBeGreaterThan(0);
     const first = shifts[0];
-    expect(first.start_datetime.getHours()).toBe(9);
-    expect(first.start_datetime.getMinutes()).toBe(30);
+    expect(first.start_datetime.getUTCHours()).toBe(9);
+    expect(first.start_datetime.getUTCMinutes()).toBe(30);
+  });
+
+  it('first shift starts at correct UTC time for non-UTC timezone', () => {
+    // Asia/Jerusalem is UTC+2 in winter
+    const shifts = generateShifts('2024-01-15', '2024-01-15', '09:00', 12, 'Asia/Jerusalem');
+    expect(shifts.length).toBeGreaterThan(0);
+    expect(shifts[0].start_datetime.getUTCHours()).toBe(7); // 09:00 Jerusalem = 07:00 UTC
   });
 
   it('each shift end equals next shift start', () => {
-    const shifts = generateShifts('2024-01-01', '2024-01-03', '06:00', 6);
+    const shifts = generateShifts('2024-01-01', '2024-01-03', '06:00', 6, TZ);
     for (let i = 0; i < shifts.length - 1; i++) {
       expect(shifts[i].end_datetime.getTime()).toBe(shifts[i + 1].start_datetime.getTime());
     }
   });
 
   it('shift duration matches durationHours', () => {
-    const shifts = generateShifts('2024-01-01', '2024-01-02', '00:00', 8);
+    const shifts = generateShifts('2024-01-01', '2024-01-02', '00:00', 8, TZ);
     for (const shift of shifts) {
       const durationMs = shift.end_datetime.getTime() - shift.start_datetime.getTime();
       expect(durationMs).toBe(8 * 60 * 60 * 1000);
@@ -44,12 +51,12 @@ describe('generateShifts', () => {
   });
 
   it('returns empty array when startDate is after endDate', () => {
-    const shifts = generateShifts('2024-01-05', '2024-01-04', '09:00', 8);
+    const shifts = generateShifts('2024-01-05', '2024-01-04', '09:00', 8, TZ);
     expect(shifts).toHaveLength(0);
   });
 
   it('returns Date objects for start/end datetimes', () => {
-    const shifts = generateShifts('2024-01-01', '2024-01-01', '09:00', 12);
+    const shifts = generateShifts('2024-01-01', '2024-01-01', '09:00', 12, TZ);
     expect(shifts[0].start_datetime).toBeInstanceOf(Date);
     expect(shifts[0].end_datetime).toBeInstanceOf(Date);
   });
