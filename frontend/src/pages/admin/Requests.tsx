@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { homeRequestsApi } from '../../api/homeRequests';
@@ -109,6 +109,13 @@ export default function Requests() {
 
   const { data: schedules = [] } = useQuery({ queryKey: ['schedules'], queryFn: schedulesApi.list });
 
+  // Default to first schedule once loaded
+  useEffect(() => {
+    if (schedules.length > 0 && !scheduleFilter) {
+      setScheduleFilter(String(schedules[0].id));
+    }
+  }, [schedules]);
+
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['requests', scheduleFilter, statusFilter],
     queryFn: () =>
@@ -136,7 +143,6 @@ export default function Requests() {
 
       <div className="flex gap-3">
         <select className="input max-w-xs" value={scheduleFilter} onChange={(e) => setScheduleFilter(e.target.value)}>
-          <option value="">All schedules</option>
           {schedules.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
         <select className="input max-w-xs" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
