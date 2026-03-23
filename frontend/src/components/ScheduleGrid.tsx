@@ -238,7 +238,7 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
     members.every((m) => selectedCells.has(`${shift.id}:${m.user.id}`));
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* Warning modal */}
       {warning && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -258,43 +258,65 @@ export default function ScheduleGrid({ data, isAdminView = false }: ScheduleGrid
         </div>
       )}
 
-      {/* Toolbar */}
-      {isAdminView && (isSelectMode || hasPendingChanges) && (
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Bulk action bar (shown when cells are selected) */}
-          {isSelectMode && (
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm">
-              <span className="text-xs text-gray-500 font-medium">{selectedCells.size} selected — set to:</span>
+      {/* Action bar — fixed height slot, always reserves space in admin view to avoid layout shift */}
+      {isAdminView && (
+        <div className="h-12 mb-3 flex items-stretch">
+          {isSelectMode ? (
+            /* ── Selection mode: blue bar ── */
+            <div className="flex-1 flex items-center gap-3 bg-blue-600 text-white rounded-xl px-4 shadow-md">
+              <span className="text-sm font-semibold whitespace-nowrap">
+                {selectedCells.size} cell{selectedCells.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="w-px h-5 bg-blue-400" />
+              <span className="text-xs text-blue-200 whitespace-nowrap">Set to:</span>
               {(['in_shift', 'available', 'home'] as ShiftState[]).map((state) => (
                 <button
                   key={state}
-                  className="btn-sm btn-secondary text-xs"
                   onClick={() => applyToSelected(state)}
+                  className="text-xs font-medium bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap"
                 >
                   {STATE_LABELS[state]}
                 </button>
               ))}
+              <div className="flex-1" />
+              {hasPendingChanges && (
+                <span className="text-xs bg-amber-400 text-amber-900 font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                  {Object.keys(pendingChanges).length} unsaved
+                </span>
+              )}
               <button
-                className="text-xs text-gray-400 hover:text-gray-600 ml-1"
                 onClick={() => setSelectedCells(new Set())}
+                className="text-xs text-blue-200 hover:text-white transition-colors ml-1"
               >
                 Cancel
               </button>
             </div>
-          )}
-
-          {/* Right: pending changes bar */}
-          {hasPendingChanges && (
-            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5">
-              <span className="text-sm text-amber-800 font-medium">
+          ) : hasPendingChanges ? (
+            /* ── Pending changes: amber bar ── */
+            <div className="flex-1 flex items-center gap-3 bg-amber-500 text-white rounded-xl px-4 shadow-md">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-semibold whitespace-nowrap">
                 {Object.keys(pendingChanges).length} unsaved change{Object.keys(pendingChanges).length !== 1 ? 's' : ''}
               </span>
-              <button className="btn-secondary btn-sm" onClick={handleDiscard} disabled={isSaving}>Discard</button>
-              <button className="btn-primary btn-sm" onClick={handleSave} disabled={isSaving}>
+              <div className="flex-1" />
+              <button
+                onClick={handleDiscard}
+                disabled={isSaving}
+                className="text-xs font-medium bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Discard
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="text-xs font-bold bg-white text-amber-600 hover:bg-amber-50 px-3 py-1 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
+              >
                 {isSaving ? 'Saving…' : 'Save Changes'}
               </button>
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
