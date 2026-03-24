@@ -206,7 +206,7 @@ export default function ScheduleDetail() {
               return (
                 <div key={u.id} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50">
                   <div>
-                    <span className="text-sm font-medium text-gray-900">{u.name}</span>
+                    <span className="text-sm font-medium text-gray-900">{u.display_name || u.name}</span>
                     {u.is_virtual && <span className="badge badge-yellow text-[9px] ml-1"><Monitor className="w-2.5 h-2.5" />Virtual</span>}
                     {!u.is_virtual && <span className="text-xs text-gray-400 ml-2">{u.email}</span>}
                   </div>
@@ -233,7 +233,7 @@ export default function ScheduleDetail() {
           {members.map((m) => (
             <div key={m.user.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-900">{m.user.name}</span>
+                <span className="text-sm text-gray-900">{m.user.display_name || m.user.name}</span>
                 {m.user.is_virtual
                   ? <span className="badge badge-yellow text-[9px]"><Monitor className="w-2.5 h-2.5" />Virtual</span>
                   : <span className="text-xs text-gray-400">{m.user.email}</span>

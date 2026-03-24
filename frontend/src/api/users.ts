@@ -12,7 +12,7 @@ export const usersApi = {
   },
   update: async (
     id: number,
-    updates: { team_id?: number | null; is_admin?: boolean; name?: string; email?: string; is_virtual?: false }
+    updates: { team_id?: number | null; is_admin?: boolean; name?: string; display_name?: string | null; email?: string; is_virtual?: false }
   ): Promise<User> => {
     const { data } = await api.put(`/api/users/${id}`, updates);
     return data;

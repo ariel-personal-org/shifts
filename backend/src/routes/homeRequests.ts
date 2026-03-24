@@ -296,4 +296,51 @@ router.put('/:requestId/decisions', requireAuth, requireAdmin, async (req: AuthR
   }
 });
 
+// DELETE /api/home-requests/:requestId  (cancel pending shifts)
+router.delete('/:requestId', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const requestId = req.params.requestId;
+
+    const rows = await db
+      .select()
+      .from(homeRequestShifts)
+      .where(eq(homeRequestShifts.request_id, requestId));
+
+    if (rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    // Only owner or admin can cancel
+    if (!req.user!.is_admin && rows[0].user_id !== req.user!.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const pendingRows = rows.filter((r) => r.decision === 'pending');
+    if (pendingRows.length === 0) {
+      return res.status(400).json({ error: 'No pending shifts to cancel' });
+    }
+
+    // Delete only the pending rows
+    await db
+      .delete(homeRequestShifts)
+      .where(
+        and(
+          eq(homeRequestShifts.request_id, requestId),
+          eq(homeRequestShifts.decision, 'pending')
+        )
+      );
+
+    await createAuditLog({
+      actor_user_id: req.user!.id,
+      affected_user_id: rows[0].user_id,
+      schedule_id: rows[0].schedule_id,
+      action: 'home_request_cancelled',
+      new_value: { request_id: requestId, cancelled_shift_ids: pendingRows.map((r) => r.shift_id) },
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

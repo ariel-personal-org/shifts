@@ -27,7 +27,8 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
   const [expanded, setExpanded] = useState(false);
   const [localDecisions, setLocalDecisions] = useState<Record<number, 'approved' | 'rejected' | ''>>({});
   const { data: users = [] } = useQuery({ queryKey: ['users', 'all'], queryFn: () => usersApi.list() });
-  const userName = users.find((u) => u.id === request.user_id)?.name ?? `User #${request.user_id}`;
+  const requestUser = users.find((u) => u.id === request.user_id);
+  const userName = (requestUser?.display_name || requestUser?.name) ?? `User #${request.user_id}`;
 
   const pendingShifts = request.shifts.filter((s) => s.decision === 'pending');
 

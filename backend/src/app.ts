@@ -26,6 +26,7 @@ app.use(
 app.use(express.json());
 
 // Health check
+app.get('/', (_req, res) => res.json({ ok: true, service: 'shiftsync-backend' }));
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 // Routes

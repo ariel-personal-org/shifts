@@ -14,4 +14,8 @@ export const authApi = {
     const { data } = await api.post('/api/auth/dev-login', { email });
     return data;
   },
+  setDisplayName: async (display_name: string): Promise<{ user: User }> => {
+    const { data } = await api.put('/api/auth/display-name', { display_name });
+    return data;
+  },
 };

@@ -7,6 +7,7 @@ import type { Team, User } from '../types';
 const mockUser: User = {
   id: 42,
   name: 'Ghost Worker',
+  display_name: null,
   email: 'virtual-abc@shiftsync.internal',
   is_admin: false,
   is_virtual: true,

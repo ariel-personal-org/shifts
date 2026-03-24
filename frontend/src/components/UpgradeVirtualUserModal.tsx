@@ -38,7 +38,7 @@ export default function UpgradeVirtualUserModal({ user, teams, onClose, onSave, 
         </div>
 
         <p className="text-sm text-gray-500 mb-5">
-          Upgrading <span className="font-medium text-gray-700">{user.name}</span> to a real user. Once upgraded,
+          Upgrading <span className="font-medium text-gray-700">{user.display_name || user.name}</span> to a real user. Once upgraded,
           they can log in with Google using the email you set.
         </p>
 

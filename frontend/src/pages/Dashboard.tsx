@@ -90,7 +90,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Good {today.getHours() < 12 ? 'morning' : today.getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name?.split(' ')[0]}
+          Good {today.getHours() < 12 ? 'morning' : today.getHours() < 17 ? 'afternoon' : 'evening'}, {(user?.display_name || user?.name)?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 text-sm mt-0.5">{format(today, 'EEEE, MMMM d, yyyy')}</p>
       </div>

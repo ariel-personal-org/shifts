@@ -1,0 +1,679 @@
+{
+  "id": "9a72419a-0a04-4f31-b061-ef8654aed31b",
+  "prevId": "5e0e9635-94bc-4a06-877d-81f5fb211e5f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.audit_logs": {
+      "name": "audit_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actor_user_id": {
+          "name": "actor_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "affected_user_id": {
+          "name": "affected_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shift_id": {
+          "name": "shift_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action": {
+          "name": "action",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "old_value_json": {
+          "name": "old_value_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_value_json": {
+          "name": "new_value_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "audit_logs_actor_user_id_users_id_fk": {
+          "name": "audit_logs_actor_user_id_users_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "actor_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "audit_logs_affected_user_id_users_id_fk": {
+          "name": "audit_logs_affected_user_id_users_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "affected_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "audit_logs_schedule_id_schedules_id_fk": {
+          "name": "audit_logs_schedule_id_schedules_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "schedules",
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "audit_logs_shift_id_shifts_id_fk": {
+          "name": "audit_logs_shift_id_shifts_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "shifts",
+          "columnsFrom": [
+            "shift_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.home_request_shifts": {
+      "name": "home_request_shifts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shift_id": {
+          "name": "shift_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "decision": {
+          "name": "decision",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "home_request_shifts_user_id_users_id_fk": {
+          "name": "home_request_shifts_user_id_users_id_fk",
+          "tableFrom": "home_request_shifts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "home_request_shifts_schedule_id_schedules_id_fk": {
+          "name": "home_request_shifts_schedule_id_schedules_id_fk",
+          "tableFrom": "home_request_shifts",
+          "tableTo": "schedules",
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "home_request_shifts_shift_id_shifts_id_fk": {
+          "name": "home_request_shifts_shift_id_shifts_id_fk",
+          "tableFrom": "home_request_shifts",
+          "tableTo": "shifts",
+          "columnsFrom": [
+            "shift_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "home_request_shifts_shift_id_user_id_unique": {
+          "name": "home_request_shifts_shift_id_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "shift_id",
+            "user_id"
+          ]
+        }
+      }
+    },
+    "public.notifications": {
+      "name": "notifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_read": {
+          "name": "is_read",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "notifications_user_id_users_id_fk": {
+          "name": "notifications_user_id_users_id_fk",
+          "tableFrom": "notifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.schedule_members": {
+      "name": "schedule_members",
+      "schema": "",
+      "columns": {
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "schedule_members_schedule_id_schedules_id_fk": {
+          "name": "schedule_members_schedule_id_schedules_id_fk",
+          "tableFrom": "schedule_members",
+          "tableTo": "schedules",
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "schedule_members_user_id_users_id_fk": {
+          "name": "schedule_members_user_id_users_id_fk",
+          "tableFrom": "schedule_members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "schedule_members_schedule_id_user_id_pk": {
+          "name": "schedule_members_schedule_id_user_id_pk",
+          "columns": [
+            "schedule_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.schedules": {
+      "name": "schedules",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle_start_time": {
+          "name": "cycle_start_time",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shift_duration_hours": {
+          "name": "shift_duration_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "primary_team_id": {
+          "name": "primary_team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "schedules_primary_team_id_teams_id_fk": {
+          "name": "schedules_primary_team_id_teams_id_fk",
+          "tableFrom": "schedules",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "primary_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.shift_users": {
+      "name": "shift_users",
+      "schema": "",
+      "columns": {
+        "shift_id": {
+          "name": "shift_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'available'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "shift_users_shift_id_shifts_id_fk": {
+          "name": "shift_users_shift_id_shifts_id_fk",
+          "tableFrom": "shift_users",
+          "tableTo": "shifts",
+          "columnsFrom": [
+            "shift_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "shift_users_user_id_users_id_fk": {
+          "name": "shift_users_user_id_users_id_fk",
+          "tableFrom": "shift_users",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "shift_users_shift_id_user_id_pk": {
+          "name": "shift_users_shift_id_user_id_pk",
+          "columns": [
+            "shift_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.shifts": {
+      "name": "shifts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_datetime": {
+          "name": "start_datetime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_datetime": {
+          "name": "end_datetime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "index": {
+          "name": "index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "shifts_schedule_id_schedules_id_fk": {
+          "name": "shifts_schedule_id_schedules_id_fk",
+          "tableFrom": "shifts",
+          "tableTo": "schedules",
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.teams": {
+      "name": "teams",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "teams_name_unique": {
+          "name": "teams_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_virtual": {
+          "name": "is_virtual",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "users_team_id_teams_id_fk": {
+          "name": "users_team_id_teams_id_fk",
+          "tableFrom": "users",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

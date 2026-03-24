@@ -7,6 +7,7 @@ export interface Team {
 export interface User {
   id: number;
   name: string;
+  display_name: string | null;
   email: string;
   is_admin: boolean;
   is_virtual: boolean;

@@ -21,6 +21,10 @@ export const homeRequestsApi = {
     const { data } = await api.post('/api/home-requests', payload);
     return data;
   },
+  cancel: async (requestId: string): Promise<{ ok: boolean }> => {
+    const { data } = await api.delete(`/api/home-requests/${requestId}`);
+    return data;
+  },
   decide: async (
     requestId: string,
     decisions: Array<{ shift_id: number; decision: 'approved' | 'rejected' }>

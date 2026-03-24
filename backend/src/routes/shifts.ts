@@ -68,23 +68,66 @@ router.put(
           set: { state },
         });
 
-      // Audit log
-      const auditNote = hasPendingRequest && state === 'in_shift'
-        ? 'admin_assigned_in_shift_with_pending_home_request'
-        : 'state_set';
+      // If setting to 'home' and there's a pending request, approve it
+      if (state === 'home' && pendingRequest) {
+        await db
+          .update(homeRequestShifts)
+          .set({ decision: 'approved' })
+          .where(
+            and(
+              eq(homeRequestShifts.shift_id, shiftId),
+              eq(homeRequestShifts.user_id, userId),
+              eq(homeRequestShifts.decision, 'pending')
+            )
+          );
 
-      await createAuditLog({
-        actor_user_id: req.user!.id,
-        affected_user_id: userId,
-        schedule_id: scheduleId,
-        shift_id: shiftId,
-        action: auditNote,
-        old_value: { state: oldState },
-        new_value: { state },
-      });
+        await createAuditLog({
+          actor_user_id: req.user!.id,
+          affected_user_id: userId,
+          schedule_id: scheduleId,
+          shift_id: shiftId,
+          action: 'home_approved',
+          old_value: { decision: 'pending', state: oldState },
+          new_value: { decision: 'approved', state: 'home' },
+        });
 
-      // Notifications
-      if (oldState !== state) {
+        // Compute overall request status and notify user
+        const allRows = await db
+          .select()
+          .from(homeRequestShifts)
+          .where(eq(homeRequestShifts.request_id, pendingRequest.request_id));
+        const decisions = allRows.map((r) => r.decision);
+        const allApproved = decisions.every((d) => d === 'approved');
+        const allRejected = decisions.every((d) => d === 'rejected');
+        const requestStatus = allApproved ? 'approved' : allRejected ? 'rejected' : decisions.every((d) => d === 'pending') ? 'pending' : 'partial';
+
+        if (requestStatus !== 'pending') {
+          const notifType = requestStatus === 'approved' ? 'request_approved' : requestStatus === 'rejected' ? 'request_rejected' : 'request_partial';
+          await createNotification({
+            user_id: userId,
+            type: notifType,
+            payload: { request_id: pendingRequest.request_id, schedule_id: scheduleId, status: requestStatus },
+          });
+        }
+      } else {
+        // Standard audit log
+        const auditNote = hasPendingRequest && state === 'in_shift'
+          ? 'admin_assigned_in_shift_with_pending_home_request'
+          : 'state_set';
+
+        await createAuditLog({
+          actor_user_id: req.user!.id,
+          affected_user_id: userId,
+          schedule_id: scheduleId,
+          shift_id: shiftId,
+          action: auditNote,
+          old_value: { state: oldState },
+          new_value: { state },
+        });
+      }
+
+      // Notifications for state change (skip if already handled by request approval)
+      if (oldState !== state && !(state === 'home' && pendingRequest)) {
         const notifType =
           state === 'in_shift'
             ? 'assigned_in_shift'

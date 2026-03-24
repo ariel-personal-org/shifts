@@ -97,4 +97,29 @@ router.get('/me', requireAuth, (req: AuthRequest, res) => {
   return res.json({ user: req.user });
 });
 
+// PUT /api/auth/display-name — one-time set by user during onboarding
+router.put('/display-name', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    if (req.user!.display_name !== null) {
+      return res.status(403).json({ error: 'Display name already set' });
+    }
+
+    const raw = (req.body as { display_name?: string }).display_name;
+    const displayName = typeof raw === 'string' ? raw.trim() : '';
+    if (!displayName || displayName.length > 50) {
+      return res.status(400).json({ error: 'Display name must be 1-50 characters' });
+    }
+
+    const [updated] = await db
+      .update(users)
+      .set({ display_name: displayName })
+      .where(eq(users.id, req.user!.id))
+      .returning();
+    return res.json({ user: updated });
+  } catch (err) {
+    console.error('Set display name error:', err);
+    return res.status(500).json({ error: 'Failed to set display name' });
+  }
+});
+
 export default router;

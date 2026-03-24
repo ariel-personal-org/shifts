@@ -179,7 +179,7 @@ export default function Teams() {
                         .map((u) => (
                           <div key={u.id} className="flex items-center justify-between px-3 py-2 bg-white">
                             <div>
-                              <span className="text-sm font-medium">{u.name}</span>
+                              <span className="text-sm font-medium">{u.display_name || u.name}</span>
                               <span className="text-xs text-gray-400 ml-2">{u.email}</span>
                               {u.team_id && u.team_id !== team.id && (
                                 <span className="text-xs text-amber-600 ml-2">In another team</span>

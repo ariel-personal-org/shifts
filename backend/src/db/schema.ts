@@ -25,6 +25,7 @@ export const teams = pgTable('teams', {
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
+  display_name: varchar('display_name', { length: 255 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   is_admin: boolean('is_admin').notNull().default(false),
   is_virtual: boolean('is_virtual').notNull().default(false),

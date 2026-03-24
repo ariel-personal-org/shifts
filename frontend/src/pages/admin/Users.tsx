@@ -12,6 +12,7 @@ export default function Users() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [editingNames, setEditingNames] = useState<Record<number, string>>({});
+  const [editingDisplayNames, setEditingDisplayNames] = useState<Record<number, string>>({});
   const [upgradingUser, setUpgradingUser] = useState<User | null>(null);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
@@ -81,7 +82,7 @@ export default function Users() {
   }
 
   function startEditName(user: User) {
-    setEditingNames((prev) => ({ ...prev, [user.id]: user.name }));
+    setEditingNames((prev) => ({ ...prev, [user.id]: user.display_name || user.name }));
   }
 
   function cancelEditName(id: number) {
@@ -93,13 +94,34 @@ export default function Users() {
   }
 
   function saveEditName(id: number) {
-    const name = editingNames[id]?.trim();
-    if (!name) return;
+    const displayName = editingNames[id]?.trim();
+    if (!displayName) return;
     updateMutation.mutate(
-      { id, updates: { name } },
+      { id, updates: { display_name: displayName } },
       {
         onSuccess: () => cancelEditName(id),
       }
+    );
+  }
+
+  function startEditDisplayName(user: User) {
+    setEditingDisplayNames((prev) => ({ ...prev, [user.id]: user.display_name || '' }));
+  }
+
+  function cancelEditDisplayName(id: number) {
+    setEditingDisplayNames((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+
+  function saveEditDisplayName(id: number) {
+    const displayName = editingDisplayNames[id]?.trim();
+    if (!displayName) return;
+    updateMutation.mutate(
+      { id, updates: { display_name: displayName } },
+      { onSuccess: () => cancelEditDisplayName(id) },
     );
   }
 
@@ -195,7 +217,7 @@ export default function Users() {
                         </>
                       ) : (
                         <>
-                          <span className="font-medium text-gray-900">{user.name}</span>
+                          <span className="font-medium text-gray-900">{user.display_name || user.name}</span>
                           <button
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                             onClick={() => startEditName(user)}
@@ -233,7 +255,7 @@ export default function Users() {
                     <button
                       className="btn-danger btn-sm"
                       onClick={() => {
-                        if (window.confirm(`Delete virtual user "${user.name}"? This cannot be undone.`)) {
+                        if (window.confirm(`Delete virtual user "${user.display_name || user.name}"? This cannot be undone.`)) {
                           deleteMutation.mutate(user.id);
                         }
                       }}
@@ -247,11 +269,49 @@ export default function Users() {
             }
 
             // Real user row
+            const isEditingDisplayName = user.id in editingDisplayNames;
             return (
               <div key={user.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{user.name}</span>
+                    {isEditingDisplayName ? (
+                      <>
+                        <input
+                          className="input text-sm py-1 w-48"
+                          value={editingDisplayNames[user.id]}
+                          onChange={(e) =>
+                            setEditingDisplayNames((prev) => ({ ...prev, [user.id]: e.target.value }))
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEditDisplayName(user.id);
+                            if (e.key === 'Escape') cancelEditDisplayName(user.id);
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          className="btn-primary btn-sm"
+                          onClick={() => saveEditDisplayName(user.id)}
+                          disabled={updateMutation.isPending}
+                        >
+                          Save
+                        </button>
+                        <button className="btn-secondary btn-sm" onClick={() => cancelEditDisplayName(user.id)}>
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-medium text-gray-900">{user.display_name || user.name}</span>
+                        <button
+                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                          onClick={() => startEditDisplayName(user)}
+                          title="Edit display name"
+                          aria-label="Edit display name"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
                     {user.is_admin && <span className="badge badge-blue text-[9px]"><Shield className="w-2.5 h-2.5" />Admin</span>}
                     {user.id === currentUser?.id && <span className="badge badge-gray text-[9px]"><Star className="w-2.5 h-2.5" />You</span>}
                   </div>

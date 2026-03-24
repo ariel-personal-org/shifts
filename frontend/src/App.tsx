@@ -11,6 +11,7 @@ import ScheduleView from './pages/ScheduleView';
 import MyRequests from './pages/MyRequests';
 import NotificationsPage from './pages/NotificationsPage';
 import MyHistory from './pages/MyHistory';
+import OnboardPage from './pages/OnboardPage';
 
 // Admin pages
 import AdminSchedules from './pages/admin/AdminSchedules';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/onboard" element={<OnboardPage />} />
           <Route element={<Layout />}>
             {/* User routes */}
             <Route index element={<Navigate to="/dashboard" replace />} />

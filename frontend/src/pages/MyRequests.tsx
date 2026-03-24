@@ -29,8 +29,9 @@ const DECISION_STYLES: Record<string, string> = {
   rejected: 'badge-red',
 };
 
-function RequestCard({ request }: { request: HomeRequest }) {
+function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (requestId: string) => void }) {
   const [expanded, setExpanded] = useState(false);
+  const hasPendingShifts = request.shifts.some((s) => s.decision === 'pending');
   return (
     <div className="card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -43,12 +44,22 @@ function RequestCard({ request }: { request: HomeRequest }) {
             {format(parseISO(request.created_at), 'MMM d, yyyy HH:mm')}
           </span>
         </div>
-        <button
-          className="text-xs text-blue-600 hover:underline flex-shrink-0"
-          onClick={() => setExpanded((e) => !e)}
-        >
-          {expanded ? <><ChevronDown className="w-3 h-3" /> Hide</> : <><ChevronRight className="w-3 h-3" /> Details</>}
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {hasPendingShifts && onCancel && (
+            <button
+              className="text-xs text-red-600 hover:text-red-800 hover:underline"
+              onClick={() => onCancel(request.request_id)}
+            >
+              <X className="w-3 h-3 inline" /> Cancel
+            </button>
+          )}
+          <button
+            className="text-xs text-blue-600 hover:underline"
+            onClick={() => setExpanded((e) => !e)}
+          >
+            {expanded ? <><ChevronDown className="w-3 h-3" /> Hide</> : <><ChevronRight className="w-3 h-3" /> Details</>}
+          </button>
+        </div>
       </div>
 
       {expanded && (
@@ -94,6 +105,14 @@ export default function MyRequests() {
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['my-requests'],
     queryFn: () => homeRequestsApi.list(),
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (requestId: string) => homeRequestsApi.cancel(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['grid'] });
+    },
   });
 
   const createMutation = useMutation({
@@ -221,7 +240,7 @@ export default function MyRequests() {
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <RequestCard key={r.request_id} request={r} />
+            <RequestCard key={r.request_id} request={r} onCancel={(id) => cancelMutation.mutate(id)} />
           ))}
         </div>
       )}

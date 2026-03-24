@@ -41,10 +41,10 @@ function LogRow({ log, users, schedules }: { log: AuditLog; users: any[]; schedu
         {ACTION_LABELS[log.action] ?? log.action}
       </td>
       <td className="px-3 py-2 text-xs text-gray-500">
-        {actor?.name ?? (log.actor_user_id ? `#${log.actor_user_id}` : 'System')}
+        {(actor?.display_name || actor?.name) ?? (log.actor_user_id ? `#${log.actor_user_id}` : 'System')}
       </td>
       <td className="px-3 py-2 text-xs text-gray-500">
-        {affected?.name ?? (log.affected_user_id ? `#${log.affected_user_id}` : '—')}
+        {(affected?.display_name || affected?.name) ?? (log.affected_user_id ? `#${log.affected_user_id}` : '—')}
       </td>
       <td className="px-3 py-2 text-xs text-gray-500">
         {schedule?.name ?? (log.schedule_id ? `#${log.schedule_id}` : '—')}
@@ -107,7 +107,7 @@ export default function AuditLog() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <select className="input text-sm" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
             <option value="">All users</option>
-            {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+            {users.map((u) => <option key={u.id} value={u.id}>{u.display_name || u.name}</option>)}
           </select>
           <select className="input text-sm" value={scheduleFilter} onChange={(e) => setScheduleFilter(e.target.value)}>
             <option value="">All schedules</option>

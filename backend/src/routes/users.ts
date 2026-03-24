@@ -66,6 +66,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
       team_id: z.number().int().positive().nullable().optional(),
       is_admin: z.boolean().optional(),
       name: z.string().min(1).max(255).optional(),
+      display_name: z.string().min(1).max(50).nullable().optional(),
       email: z.string().email().optional(),
       is_virtual: z.literal(false).optional(),
     });
@@ -95,6 +96,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
 
     const dbUpdates: Record<string, unknown> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.display_name !== undefined) dbUpdates.display_name = updates.display_name;
     if (updates.team_id !== undefined) dbUpdates.team_id = updates.team_id;
     if (updates.is_admin !== undefined) dbUpdates.is_admin = updates.is_admin;
     if (isUpgrade) {

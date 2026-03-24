@@ -6,7 +6,7 @@ import ShiftCell from './ShiftCell';
 import { useAuth } from '../context/AuthContext';
 import { schedulesApi } from '../api/schedules';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, AlertCircle, Star, Monitor, ArrowLeftRight } from 'lucide-react';
+import { Check, AlertCircle, Star, Monitor } from 'lucide-react';
 
 interface ScheduleGridProps {
   data: GridData;
@@ -77,22 +77,14 @@ function MemberLabel({
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1">
           <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
-            {member.user.name}
+            {member.user.display_name || member.user.name}
           </span>
           {isMe && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />You</span>}
           {member.user.is_virtual && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />Virtual</span>}
         </div>
-        <div className="flex items-center gap-1 flex-wrap mt-0.5">
-          {member.is_fill_in && (
-            <span className="badge badge-purple text-[9px]">
-              <ArrowLeftRight className="w-2 h-2" />
-              Fill-in{member.team ? ` · ${member.team.name}` : ''}
-            </span>
-          )}
-          {!member.is_fill_in && member.team && (
-            <span className="text-[10px] text-gray-400">{member.team.name}</span>
-          )}
-        </div>
+        {member.team && (
+          <span className="text-[10px] text-gray-400 truncate">{member.team.name}</span>
+        )}
       </div>
     </div>
   );
@@ -158,7 +150,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const handleSingleStateSelect = (member: MemberRow, shift: Shift, newState: ShiftState, hasPending: boolean) => {
     const key = `${shift.id}:${member.user.id}`;
     if (newState === 'in_shift' && hasPending) {
-      setWarning({ keys: [key], state: newState, affectedNames: [member.user.name] });
+      setWarning({ keys: [key], state: newState, affectedNames: [member.user.display_name || member.user.name] });
       setEditingCell(null);
       return;
     }
@@ -210,7 +202,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
         const stateObj = member?.states.find((s) => s.shift_id === shiftId);
         if (stateObj?.has_pending_request) {
           affected.push(key);
-          if (member) affectedNames.push(member.user.name);
+          if (member) affectedNames.push(member.user.display_name || member.user.name);
         }
       });
       if (affected.length > 0) {
@@ -360,16 +352,17 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 <>
                   {isPrimaryBoundary && (
                     <tr key={`divider-${memberIdx}`}>
-                      <td colSpan={shifts.length + 1} className="bg-gray-100 border-y border-gray-200 px-3 py-1">
+                      <td className="sticky left-0 z-10 bg-gray-100 border-y border-gray-200 px-3 py-1">
                         <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                           Fill-in Members
                         </span>
                       </td>
+                      <td colSpan={shifts.length} className="bg-gray-100 border-y border-gray-200" />
                     </tr>
                   )}
                   <tr
                     key={member.user.id}
-                    className={`border-b border-gray-100 hover:bg-gray-50/50 ${
+                    className={`border-b border-gray-200 hover:bg-gray-50/50 ${
                       isMe ? 'bg-blue-50/40' : member.is_fill_in ? 'bg-purple-50/30' : 'bg-white'
                     }`}
                   >

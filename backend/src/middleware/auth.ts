@@ -9,6 +9,7 @@ export interface AuthRequest extends Request {
     id: number;
     email: string;
     name: string;
+    display_name: string | null;
     is_admin: boolean;
     is_virtual: boolean;
     team_id: number | null;
