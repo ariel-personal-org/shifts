@@ -276,7 +276,13 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 <button
                   key={state}
                   onClick={() => applyToSelected(state)}
-                  className="text-xs font-medium bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap"
+                  className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap ${
+                    state === 'in_shift'
+                      ? 'bg-green-100 hover:bg-green-200 text-green-800'
+                      : state === 'home'
+                      ? 'bg-red-100 hover:bg-red-200 text-red-800'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
                 >
                   {t(`shifts.${state}`)}
                 </button>
