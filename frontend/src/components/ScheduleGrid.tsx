@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isToday, parseISO } from 'date-fns';
+import { he as heLocale, enUS } from 'date-fns/locale';
 import { formatInTimeZone } from 'date-fns-tz';
 import type { GridData, ShiftState, MemberRow, Shift } from '../types';
 import ShiftCell from './ShiftCell';
@@ -7,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { schedulesApi } from '../api/schedules';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, AlertCircle, Star, Monitor } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ScheduleGridProps {
   data: GridData;
@@ -14,18 +16,14 @@ interface ScheduleGridProps {
   scrollRef?: React.RefObject<HTMLDivElement>;
 }
 
-const STATE_LABELS: Record<ShiftState, string> = {
-  in_shift: 'In Shift',
-  available: 'Available',
-  home: 'Home',
-};
-
 function ShiftHeader({
   shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView, timezone,
 }: {
   shift: Shift; inShiftCount: number; capacity: number;
   isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void; isAdminView: boolean; timezone: string;
 }) {
+  const { i18n } = useTranslation();
+  const dateLocale = i18n.language === 'he' ? heLocale : enUS;
   const start = parseISO(shift.start_datetime);
   const isTodayShift = isToday(start);
   const isUnder = inShiftCount < capacity;
@@ -43,7 +41,8 @@ function ShiftHeader({
         ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
         {allSelected && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
-      <div className="text-[10px] text-gray-500 leading-tight">{formatInTimeZone(start, timezone, 'MMM d')}</div>
+      <div className="text-[10px] font-semibold text-gray-700 leading-tight">{formatInTimeZone(start, timezone, 'EEEE', { locale: dateLocale })}</div>
+      <div className="text-[10px] text-gray-500 leading-tight">{formatInTimeZone(start, timezone, 'MMM d', { locale: dateLocale })}</div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
         {formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}
       </div>
@@ -61,6 +60,7 @@ function MemberLabel({
   member: MemberRow; isMe: boolean;
   isSelectMode: boolean; allSelected: boolean; onToggleRow: () => void; isAdminView: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={`min-w-[140px] max-w-[140px] px-2 py-1.5 flex items-center gap-1.5
@@ -79,8 +79,8 @@ function MemberLabel({
           <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
             {member.user.display_name || member.user.name}
           </span>
-          {isMe && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />You</span>}
-          {member.user.is_virtual && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />Virtual</span>}
+          {isMe && <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />{t('grid.you_label')}</span>}
+          {member.user.is_virtual && <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />{t('grid.virtual_label')}</span>}
         </div>
         {member.team && (
           <span className="text-[10px] text-gray-400 truncate">{member.team.name}</span>
@@ -92,6 +92,7 @@ function MemberLabel({
 
 export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: ScheduleGridProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // Edit mode state
@@ -231,22 +232,23 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const isColumnAllSelected = (shift: Shift) =>
     members.every((m) => selectedCells.has(`${shift.id}:${m.user.id}`));
 
+  const pendingCount = Object.keys(pendingChanges).length;
+
   return (
     <div>
       {/* Warning modal */}
       {warning && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            <h3 className="font-semibold text-gray-900 mb-2">Pending Home Request</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('grid.warning_title')}</h3>
             <p className="text-sm text-gray-600 mb-4">
               {warning.affectedNames.length === 1
-                ? <><strong>{warning.affectedNames[0]}</strong> has</>
-                : <><strong>{warning.affectedNames.join(', ')}</strong> have</>}{' '}
-              a pending home request for one or more of these shifts. Assigning to <strong>In Shift</strong> will not cancel their request — it remains pending until explicitly resolved.
+                ? <><strong>{warning.affectedNames[0]}</strong> {t('grid.warning_body')}</>
+                : <><strong>{warning.affectedNames.join(', ')}</strong> {t('grid.warning_body')}</>}
             </p>
             <div className="flex gap-3 justify-end">
-              <button className="btn-secondary" onClick={() => setWarning(null)}>Cancel</button>
-              <button className="btn-primary" onClick={confirmWarning}>Stage Anyway</button>
+              <button className="btn-secondary" onClick={() => setWarning(null)}>{t('grid.cancel')}</button>
+              <button className="btn-primary" onClick={confirmWarning}>{t('grid.stage_anyway')}</button>
             </div>
           </div>
         </div>
@@ -259,30 +261,30 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
             /* ── Selection mode: blue bar ── */
             <div className="flex-1 flex items-center gap-3 bg-blue-600 text-white rounded-xl px-4 shadow-md">
               <span className="text-sm font-semibold whitespace-nowrap">
-                {selectedCells.size} cell{selectedCells.size !== 1 ? 's' : ''} selected
+                {selectedCells.size !== 1 ? t('grid.cells_selected_other', { count: selectedCells.size }) : t('grid.cells_selected_one', { count: selectedCells.size })}
               </span>
               <div className="w-px h-5 bg-blue-400" />
-              <span className="text-xs text-blue-200 whitespace-nowrap">Set to:</span>
+              <span className="text-xs text-blue-200 whitespace-nowrap">{t('grid.set_to')}</span>
               {(['in_shift', 'available', 'home'] as ShiftState[]).map((state) => (
                 <button
                   key={state}
                   onClick={() => applyToSelected(state)}
                   className="text-xs font-medium bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap"
                 >
-                  {STATE_LABELS[state]}
+                  {t(`shifts.${state}`)}
                 </button>
               ))}
               <div className="flex-1" />
               {hasPendingChanges && (
                 <span className="text-xs bg-amber-400 text-amber-900 font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
-                  {Object.keys(pendingChanges).length} unsaved
+                  {pendingCount !== 1 ? t('grid.unsaved_badge_other', { count: pendingCount }) : t('grid.unsaved_badge_one', { count: pendingCount })}
                 </span>
               )}
               <button
                 onClick={() => setSelectedCells(new Set())}
                 className="text-xs text-blue-200 hover:text-white transition-colors ml-1"
               >
-                Cancel
+                {t('grid.cancel')}
               </button>
             </div>
           ) : hasPendingChanges ? (
@@ -290,7 +292,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
             <div className="flex-1 flex items-center gap-3 bg-amber-500 text-white rounded-xl px-4 shadow-md">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm font-semibold whitespace-nowrap">
-                {Object.keys(pendingChanges).length} unsaved change{Object.keys(pendingChanges).length !== 1 ? 's' : ''}
+                {pendingCount !== 1 ? t('grid.unsaved_other', { count: pendingCount }) : t('grid.unsaved_one', { count: pendingCount })}
               </span>
               <div className="flex-1" />
               <button
@@ -298,14 +300,14 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 disabled={isSaving}
                 className="text-xs font-medium bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
               >
-                Discard
+                {t('grid.discard')}
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="text-xs font-bold bg-white text-amber-600 hover:bg-amber-50 px-3 py-1 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
               >
-                {isSaving ? 'Saving…' : 'Save Changes'}
+                {isSaving ? t('grid.saving') : t('grid.save_changes')}
               </button>
             </div>
           ) : null}
@@ -313,12 +315,12 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
       )}
 
       {/* Scrollable grid */}
-      <div ref={scrollRef} className="overflow-auto rounded-xl border border-gray-200 shadow-sm">
+      <div ref={scrollRef} className="overflow-auto rounded-xl border border-gray-200 shadow-sm" dir="ltr">
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
               <th className="sticky left-0 z-20 bg-gray-50 border-r border-gray-200 min-w-[140px] max-w-[140px] px-2 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Member
+                {t('grid.member_col')}
               </th>
               {shifts.map((shift) => {
                 const isTodayShift = isToday(parseISO(shift.start_datetime));
@@ -354,7 +356,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                     <tr key={`divider-${memberIdx}`}>
                       <td className="sticky left-0 z-10 bg-gray-100 border-y border-gray-200 px-3 py-1">
                         <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                          Fill-in Members
+                          {t('grid.fill_in_divider')}
                         </span>
                       </td>
                       <td colSpan={shifts.length} className="bg-gray-100 border-y border-gray-200" />
@@ -409,9 +411,9 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                                   handleSingleStateSelect(member, shift, e.target.value as ShiftState, hasPending)
                                 }
                               >
-                                <option value="in_shift">In Shift</option>
-                                <option value="available">Available</option>
-                                <option value="home">Home</option>
+                                <option value="in_shift">{t('shifts.in_shift')}</option>
+                                <option value="available">{t('shifts.available')}</option>
+                                <option value="home">{t('shifts.home')}</option>
                               </select>
                             </div>
                           ) : (

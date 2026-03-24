@@ -1,6 +1,7 @@
 import type { ShiftState } from '../types';
 import { UserCheck, Home, Clock, ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ShiftCellProps {
   state: ShiftState;
@@ -16,12 +17,6 @@ const STATE_STYLES: Record<ShiftState, string> = {
   home: 'bg-red-100 text-red-800 border-red-200',
 };
 
-const STATE_LABELS: Record<ShiftState, string> = {
-  in_shift: 'In Shift',
-  available: 'Available',
-  home: 'Home',
-};
-
 const STATE_ICONS: Partial<Record<ShiftState, LucideIcon>> = {
   in_shift: UserCheck,
   home: Home,
@@ -34,6 +29,8 @@ export default function ShiftCell({
   onClick,
   disabled = false,
 }: ShiftCellProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`relative min-w-[90px] h-16 border rounded-lg p-1.5 flex flex-col items-center justify-center gap-0.5 transition-all
@@ -45,12 +42,12 @@ export default function ShiftCell({
     >
       <span className="inline-flex items-center gap-0.5 text-xs font-semibold leading-none">
         {STATE_ICONS[state] && (() => { const Icon = STATE_ICONS[state]!; return <Icon className="w-3 h-3" />; })()}
-        {STATE_LABELS[state]}
+        {t(`shifts.${state}`)}
       </span>
       {hasPendingRequest && (
         <span className="flex items-center gap-0.5 text-[9px] font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-200 mt-0.5">
           <Clock className="w-2 h-2" />
-          Pending
+          {t('shifts.pending')}
         </span>
       )}
       {isAdmin && (

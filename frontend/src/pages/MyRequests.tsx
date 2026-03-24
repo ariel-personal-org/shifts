@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import type { HomeRequest, RequestStatus } from '../types';
 import type { LucideIcon } from 'lucide-react';
 import { Clock, CheckCircle, XCircle, AlertTriangle, Plus, Send, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_ICONS: Record<RequestStatus, LucideIcon> = {
   pending: Clock,
@@ -31,14 +32,15 @@ const DECISION_STYLES: Record<string, string> = {
 
 function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (requestId: string) => void }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
   const hasPendingShifts = request.shifts.some((s) => s.decision === 'pending');
   return (
     <div className="card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={STATUS_STYLES[request.status]}>{(() => { const Icon = STATUS_ICONS[request.status]; return <Icon className="w-3 h-3" />; })()}{request.status}</span>
+          <span className={STATUS_STYLES[request.status]}>{(() => { const Icon = STATUS_ICONS[request.status]; return <Icon className="w-3 h-3" />; })()}{t(`admin_requests.${request.status}`)}</span>
           <span className="text-sm text-gray-600">
-            {request.shifts.length} shift{request.shifts.length !== 1 ? 's' : ''}
+            {request.shifts.length} {request.shifts.length !== 1 ? t('admin_requests.shift_count_other', { count: request.shifts.length }) : t('admin_requests.shift_count_one', { count: request.shifts.length })}
           </span>
           <span className="text-xs text-gray-400">
             {format(parseISO(request.created_at), 'MMM d, yyyy HH:mm')}
@@ -50,14 +52,14 @@ function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (
               className="text-xs text-red-600 hover:text-red-800 hover:underline"
               onClick={() => onCancel(request.request_id)}
             >
-              <X className="w-3 h-3 inline" /> Cancel
+              <X className="w-3 h-3 inline" /> {t('my_requests.cancel_request')}
             </button>
           )}
           <button
             className="text-xs text-blue-600 hover:underline"
             onClick={() => setExpanded((e) => !e)}
           >
-            {expanded ? <><ChevronDown className="w-3 h-3" /> Hide</> : <><ChevronRight className="w-3 h-3" /> Details</>}
+            {expanded ? <><ChevronDown className="w-3 h-3" /> {t('my_requests.hide')}</> : <><ChevronRight className="w-3 h-3" /> {t('my_requests.details')}</>}
           </button>
         </div>
       </div>
@@ -69,7 +71,7 @@ function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (
               <span className="text-gray-700">
                 {formatInTimeZone(parseISO(s.shift.start_datetime), request.schedule_timezone, 'EEE MMM d, HH:mm')} – {formatInTimeZone(parseISO(s.shift.end_datetime), request.schedule_timezone, 'HH:mm')}
               </span>
-              <span className={`${DECISION_STYLES[s.decision]} self-start sm:self-auto`}>{s.decision}</span>
+              <span className={`${DECISION_STYLES[s.decision]} self-start sm:self-auto`}>{t(`admin_requests.${s.decision}`)}</span>
             </div>
           ))}
         </div>
@@ -80,6 +82,7 @@ function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (
 
 export default function MyRequests() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
   const [selectedShiftIds, setSelectedShiftIds] = useState<number[]>([]);
@@ -145,19 +148,19 @@ export default function MyRequests() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">My Home Requests</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('my_requests.title')}</h1>
         <button className="btn-primary self-start sm:self-auto" onClick={() => setShowForm(true)}>
-          <Plus className="w-4 h-4" /> New Request
+          <Plus className="w-4 h-4" /> {t('my_requests.new_request')}
         </button>
       </div>
 
       {/* Create form */}
       {showForm && (
         <div className="card p-5 space-y-4">
-          <h2 className="font-semibold text-gray-900">Request Home</h2>
+          <h2 className="font-semibold text-gray-900">{t('my_requests.request_home')}</h2>
 
           <div>
-            <label className="label">Schedule</label>
+            <label className="label">{t('my_requests.schedule_label')}</label>
             <select
               className="input"
               value={selectedScheduleId ?? ''}
@@ -166,7 +169,7 @@ export default function MyRequests() {
                 setSelectedShiftIds([]);
               }}
             >
-              <option value="">Select a schedule…</option>
+              <option value="">{t('my_requests.select_schedule')}</option>
               {schedules.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
@@ -175,7 +178,7 @@ export default function MyRequests() {
 
           {selectedScheduleId && eligibleShifts.length > 0 && (
             <div>
-              <label className="label">Select Shifts (click to toggle)</label>
+              <label className="label">{t('my_requests.shifts_label')}</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
                 {eligibleShifts.map((shift) => {
                   const isSelected = selectedShiftIds.includes(shift.id);
@@ -199,7 +202,7 @@ export default function MyRequests() {
                     >
                       <div className="font-medium">{formatInTimeZone(parseISO(shift.start_datetime), gridData!.schedule.timezone, 'EEE MMM d')}</div>
                       <div className="text-gray-500">{formatInTimeZone(parseISO(shift.start_datetime), gridData!.schedule.timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), gridData!.schedule.timezone, 'HH:mm')}</div>
-                      {hasPending && <div className="text-amber-600 mt-0.5">Already pending</div>}
+                      {hasPending && <div className="text-amber-600 mt-0.5">{t('my_requests.already_pending')}</div>}
                     </button>
                   );
                 })}
@@ -208,7 +211,7 @@ export default function MyRequests() {
           )}
 
           {selectedScheduleId && eligibleShifts.length === 0 && (
-            <p className="text-sm text-gray-500">No eligible shifts found. You may not be a member of this schedule.</p>
+            <p className="text-sm text-gray-500">{t('my_requests.no_eligible')}</p>
           )}
 
           <div className="flex gap-3">
@@ -217,16 +220,16 @@ export default function MyRequests() {
               disabled={selectedShiftIds.length === 0 || createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
-              {createMutation.isPending ? 'Submitting…' : <><Send className="w-3.5 h-3.5" /> Submit Request ({selectedShiftIds.length} shifts)</>}
+              {createMutation.isPending ? t('my_requests.submitting') : <><Send className="w-3.5 h-3.5" /> {t('my_requests.submit_btn', { count: selectedShiftIds.length })}</>}
             </button>
             <button className="btn-secondary" onClick={() => { setShowForm(false); setSelectedShiftIds([]); setSelectedScheduleId(null); }}>
-              <X className="w-3.5 h-3.5" /> Cancel
+              <X className="w-3.5 h-3.5" /> {t('my_requests.cancel')}
             </button>
           </div>
 
           {createMutation.isError && (
             <p className="text-red-600 text-sm">
-              {(createMutation.error as any)?.response?.data?.error ?? 'Failed to create request'}
+              {(createMutation.error as any)?.response?.data?.error ?? t('my_requests.failed_create')}
             </p>
           )}
         </div>
@@ -236,7 +239,7 @@ export default function MyRequests() {
       {isLoading ? (
         <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>
       ) : requests.length === 0 ? (
-        <div className="card p-8 text-center text-gray-500">No home requests yet.</div>
+        <div className="card p-8 text-center text-gray-500">{t('my_requests.no_requests')}</div>
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (

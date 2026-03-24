@@ -4,10 +4,12 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/auth';
 import { CalendarCheck, CalendarOff, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [devEmail, setDevEmail] = useState('alice@example.com');
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default function LoginPage() {
       navigate('/dashboard', { replace: true });
     } catch (err) {
       console.error('Login failed:', err);
-      alert('Login failed. Please try again.');
+      alert(t('login.login_failed'));
     }
   };
 
@@ -31,28 +33,28 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl p-10 w-full max-w-sm text-center">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-blue-600 mb-2">ShiftSync</h1>
-          <p className="text-gray-500 text-sm">Schedule management for your team</p>
+          <p className="text-gray-500 text-sm">{t('login.tagline')}</p>
         </div>
 
         <div className="mb-8 space-y-4">
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0"><CalendarCheck className="w-4 h-4" /></div>
-            <span>Manage shift schedules</span>
+            <span>{t('login.feature_shifts')}</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><CalendarOff className="w-4 h-4" /></div>
-            <span>Request time off</span>
+            <span>{t('login.feature_time_off')}</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><Users className="w-4 h-4" /></div>
-            <span>Track your team</span>
+            <span>{t('login.feature_track')}</span>
           </div>
         </div>
 
         <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleSuccess}
-            onError={() => alert('Google login failed')}
+            onError={() => alert(t('login.google_failed'))}
             useOneTap
             shape="pill"
             size="large"
@@ -61,14 +63,14 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-xs text-gray-400">
-          Sign in with your Google account to get started.
+          {t('login.sign_in_hint')}
           <br />
-          New users are registered automatically.
+          {t('login.auto_register')}
         </p>
 
         {import.meta.env.DEV && (
           <div className="mt-6 pt-6 border-t border-dashed border-gray-200">
-            <p className="text-xs text-amber-600 font-medium mb-3">Dev login (local only)</p>
+            <p className="text-xs text-amber-600 font-medium mb-3">{t('login.dev_login')}</p>
             <div className="flex gap-2">
               <select
                 value={devEmail}
@@ -88,12 +90,12 @@ export default function LoginPage() {
                     login(u, token);
                     navigate('/dashboard', { replace: true });
                   } catch {
-                    alert('Dev login failed — run pnpm db:seed first');
+                    alert(t('login.dev_failed'));
                   }
                 }}
                 className="text-sm bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
               >
-                Login
+                {t('login.login_btn')}
               </button>
             </div>
           </div>

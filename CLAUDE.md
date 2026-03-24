@@ -47,6 +47,12 @@ These decisions are **final** — do not revisit without explicit user instructi
 - Admin users must be routed to `/admin/schedules/:id` (editable view), not `/schedules/:id` (read-only user view)
 - The Requests page admin view shows **all** requests system-wide, not filtered to the admin's own user ID
 
+## Internationalization (i18n)
+- The app supports English and Hebrew. Hebrew is RTL; the `<html dir>` attribute is set automatically on language change.
+- **All new UI strings must have entries in both `frontend/src/locales/en.json` and `frontend/src/locales/he.json`.**
+- Use `useTranslation` / `t()` from `react-i18next` — never hardcode English strings in components.
+- The schedule grid is forced `dir="ltr"` regardless of language (sticky columns depend on it).
+
 ## Packages & Dependencies
 When adding new packages, use `pnpm add` (not npm/yarn). Do not add packages that are already available from existing dependencies.
 

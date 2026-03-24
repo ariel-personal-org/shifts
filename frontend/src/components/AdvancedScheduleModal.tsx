@@ -3,6 +3,7 @@ import { addHours } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 import type { GridData, Schedule } from '../types';
 import { X, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   schedule: Schedule;
@@ -31,6 +32,7 @@ function computeShiftCount(
 }
 
 export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave, isSaving }: Props) {
+  const { t } = useTranslation();
   const [startTime, setStartTime] = useState(schedule.cycle_start_time);
   const [duration, setDuration] = useState(schedule.shift_duration_hours);
 
@@ -84,7 +86,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl mx-4">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-gray-900">Advanced Schedule Settings</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('advanced_modal.title')}</h2>
           <button
             className="text-gray-400 hover:text-gray-600"
             onClick={onClose}
@@ -97,7 +99,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Shift Start Time
+              {t('advanced_modal.shift_start_time')}
             </label>
             <input
               type="time"
@@ -109,7 +111,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Shift Duration (hours)
+              {t('advanced_modal.shift_duration')}
             </label>
             <input
               type="number"
@@ -125,7 +127,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
         {/* Preview */}
         <div className="mt-5 pt-4 border-t border-gray-100 space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Shifts</span>
+            <span className="text-gray-500">{t('advanced_modal.shifts_label')}</span>
             <span className="font-medium text-gray-900">
               {impact.oldCount}
               {hasChanges && impact.newCount !== impact.oldCount && (
@@ -134,36 +136,35 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
                 </span>
               )}
               {hasChanges && impact.newCount === impact.oldCount && impact.oldCount > 0 && (
-                <span className="text-gray-400"> (unchanged)</span>
+                <span className="text-gray-400"> {t('advanced_modal.unchanged')}</span>
               )}
             </span>
           </div>
 
           {hasChanges && impact.addedCount > 0 && (
             <div className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
-              {impact.addedCount} new shift{impact.addedCount !== 1 ? 's' : ''} will be added.
-              All members will be set to <span className="font-medium">available</span> for new shifts.
+              {impact.addedCount !== 1 ? t('advanced_modal.shifts_added_other', { count: impact.addedCount }) : t('advanced_modal.shifts_added_one', { count: impact.addedCount })}
             </div>
           )}
 
           {hasChanges && impact.deletedCount > 0 && (
             <div className="text-sm bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 space-y-1">
               <div className="flex items-center gap-1 font-medium text-amber-800">
-                <AlertTriangle className="w-4 h-4" /> {impact.deletedCount} shift{impact.deletedCount !== 1 ? 's' : ''} will be removed
+                <AlertTriangle className="w-4 h-4" /> {impact.deletedCount !== 1 ? t('advanced_modal.shifts_removed_other', { count: impact.deletedCount }) : t('advanced_modal.shifts_removed_one', { count: impact.deletedCount })}
               </div>
               {impact.assignments > 0 && (
                 <div className="text-amber-700">
-                  • {impact.assignments} user assignment{impact.assignments !== 1 ? 's' : ''} (in-shift or home) will be cleared
+                  • {impact.assignments !== 1 ? t('advanced_modal.assignments_cleared_other', { count: impact.assignments }) : t('advanced_modal.assignments_cleared_one', { count: impact.assignments })}
                 </div>
               )}
               {impact.requests > 0 && (
                 <div className="text-amber-700">
-                  • {impact.requests} pending home request{impact.requests !== 1 ? 's' : ''} will be canceled
+                  • {impact.requests !== 1 ? t('advanced_modal.requests_canceled_other', { count: impact.requests }) : t('advanced_modal.requests_canceled_one', { count: impact.requests })}
                 </div>
               )}
               {!hasDataLoss && (
                 <div className="text-amber-700">
-                  No active assignments or requests on the removed shifts.
+                  {t('advanced_modal.no_active')}
                 </div>
               )}
             </div>
@@ -171,14 +172,14 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
 
           {isInvalid && (
             <div className="text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2">
-              Duration too long — no shifts would fit in the schedule's date range.
+              {t('advanced_modal.invalid')}
             </div>
           )}
         </div>
 
         <div className="flex justify-end gap-2 mt-6">
           <button className="btn-secondary" onClick={onClose} disabled={isSaving}>
-            <X className="w-3.5 h-3.5" /> Cancel
+            <X className="w-3.5 h-3.5" /> {t('advanced_modal.cancel')}
           </button>
           {impact.deletedCount > 0 ? (
             <button
@@ -186,7 +187,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
               onClick={handleSave}
               disabled={!canSave}
             >
-              {isSaving ? 'Saving…' : `Save — Delete ${impact.deletedCount} Shift${impact.deletedCount !== 1 ? 's' : ''}`}
+              {isSaving ? t('advanced_modal.saving') : (impact.deletedCount !== 1 ? t('advanced_modal.delete_btn_other', { count: impact.deletedCount }) : t('advanced_modal.delete_btn_one', { count: impact.deletedCount }))}
             </button>
           ) : (
             <button
@@ -194,7 +195,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
               onClick={handleSave}
               disabled={!canSave}
             >
-              {isSaving ? 'Saving…' : 'Save'}
+              {isSaving ? t('advanced_modal.saving') : t('advanced_modal.save')}
             </button>
           )}
         </div>

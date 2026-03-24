@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import UpgradeVirtualUserModal from '../../components/UpgradeVirtualUserModal';
 import type { User } from '../../types';
 import { Plus, Pencil, Monitor, ArrowUpCircle, Trash2, Shield, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Users() {
   const [search, setSearch] = useState('');
@@ -18,6 +19,7 @@ export default function Users() {
   const addInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation();
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users', 'search', search],
@@ -133,16 +135,16 @@ export default function Users() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
         <button className="btn-secondary" onClick={startAddForm} disabled={showAddForm}>
-          <Plus className="w-4 h-4" /> Add Virtual User
+          <Plus className="w-4 h-4" /> {t('users.add_virtual')}
         </button>
       </div>
 
       <div>
         <input
           className="input max-w-sm"
-          placeholder="Search by name or email…"
+          placeholder={t('users.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -157,7 +159,7 @@ export default function Users() {
           <input
             ref={addInputRef}
             className="input flex-1"
-            placeholder="Display name…"
+            placeholder={t('users.display_name_placeholder')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
@@ -166,10 +168,10 @@ export default function Users() {
             className="btn-primary btn-sm"
             disabled={!newName.trim() || createMutation.isPending}
           >
-            {createMutation.isPending ? 'Creating…' : 'Create'}
+            {createMutation.isPending ? t('users.creating') : t('users.create_btn')}
           </button>
           <button type="button" className="btn-secondary btn-sm" onClick={cancelAddForm}>
-            Cancel
+            {t('users.cancel')}
           </button>
         </form>
       )}
@@ -179,7 +181,7 @@ export default function Users() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
         </div>
       ) : users.length === 0 ? (
-        <div className="card p-8 text-center text-gray-500">No users found.</div>
+        <div className="card p-8 text-center text-gray-500">{t('users.no_users')}</div>
       ) : (
         <div className="card divide-y divide-gray-100">
           {users.map((user) => {
@@ -209,10 +211,10 @@ export default function Users() {
                             onClick={() => saveEditName(user.id)}
                             disabled={updateMutation.isPending}
                           >
-                            Save
+                            {t('users.save')}
                           </button>
                           <button className="btn-secondary btn-sm" onClick={() => cancelEditName(user.id)}>
-                            Cancel
+                            {t('users.cancel')}
                           </button>
                         </>
                       ) : (
@@ -221,14 +223,14 @@ export default function Users() {
                           <button
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                             onClick={() => startEditName(user)}
-                            title="Edit name"
-                            aria-label="Edit name"
+                            title={t('users.edit_name_title')}
+                            aria-label={t('users.edit_name_title')}
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                         </>
                       )}
-                      <span className="badge badge-yellow text-[9px]"><Monitor className="w-2.5 h-2.5" />Virtual</span>
+                      <span className="badge badge-yellow text-[9px]"><Monitor className="w-2.5 h-2.5" />{t('users.virtual_label')}</span>
                     </div>
                   </div>
 
@@ -244,13 +246,13 @@ export default function Users() {
                         });
                       }}
                     >
-                      <option value="">No team</option>
+                      <option value="">{t('users.no_team')}</option>
                       {teams.map((t) => (
                         <option key={t.id} value={t.id}>{t.name}</option>
                       ))}
                     </select>
                     <button className="btn-secondary btn-sm" onClick={() => openUpgradeModal(user)}>
-                      <ArrowUpCircle className="w-3.5 h-3.5" /> Upgrade
+                      <ArrowUpCircle className="w-3.5 h-3.5" /> {t('users.upgrade')}
                     </button>
                     <button
                       className="btn-danger btn-sm"
@@ -261,7 +263,7 @@ export default function Users() {
                       }}
                       disabled={deleteMutation.isPending}
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                      <Trash2 className="w-3.5 h-3.5" /> {t('users.delete')}
                     </button>
                   </div>
                 </div>
@@ -293,10 +295,10 @@ export default function Users() {
                           onClick={() => saveEditDisplayName(user.id)}
                           disabled={updateMutation.isPending}
                         >
-                          Save
+                          {t('users.save')}
                         </button>
                         <button className="btn-secondary btn-sm" onClick={() => cancelEditDisplayName(user.id)}>
-                          Cancel
+                          {t('users.cancel')}
                         </button>
                       </>
                     ) : (
@@ -305,15 +307,15 @@ export default function Users() {
                         <button
                           className="text-gray-400 hover:text-gray-600 transition-colors"
                           onClick={() => startEditDisplayName(user)}
-                          title="Edit display name"
-                          aria-label="Edit display name"
+                          title={t('users.edit_display_name_title')}
+                          aria-label={t('users.edit_display_name_title')}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                       </>
                     )}
-                    {user.is_admin && <span className="badge badge-blue text-[9px]"><Shield className="w-2.5 h-2.5" />Admin</span>}
-                    {user.id === currentUser?.id && <span className="badge badge-gray text-[9px]"><Star className="w-2.5 h-2.5" />You</span>}
+                    {user.is_admin && <span className="badge badge-blue text-[9px]"><Shield className="w-2.5 h-2.5" />{t('users.admin_label')}</span>}
+                    {user.id === currentUser?.id && <span className="badge badge-gray text-[9px]"><Star className="w-2.5 h-2.5" />{t('users.you_label')}</span>}
                   </div>
                   <div className="text-xs text-gray-400">{user.email}</div>
                 </div>
@@ -330,7 +332,7 @@ export default function Users() {
                       });
                     }}
                   >
-                    <option value="">No team</option>
+                    <option value="">{t('users.no_team')}</option>
                     {teams.map((t) => (
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
@@ -347,7 +349,7 @@ export default function Users() {
                       }
                       disabled={updateMutation.isPending}
                     >
-                      <Shield className="w-3.5 h-3.5" /> {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                      <Shield className="w-3.5 h-3.5" /> {user.is_admin ? t('users.revoke_admin') : t('users.make_admin')}
                     </button>
                   )}
                 </div>
