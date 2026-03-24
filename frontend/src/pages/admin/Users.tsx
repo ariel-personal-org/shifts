@@ -274,8 +274,8 @@ export default function Users() {
             const isEditingDisplayName = user.id in editingDisplayNames;
             return (
               <div key={user.id} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {isEditingDisplayName ? (
                       <>
                         <input
@@ -320,7 +320,7 @@ export default function Users() {
                   <div className="text-xs text-gray-400">{user.email}</div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   <select
                     className="input text-sm py-1"
                     value={user.team_id ?? ''}
@@ -340,7 +340,7 @@ export default function Users() {
 
                   {user.id !== currentUser?.id && (
                     <button
-                      className="btn-secondary btn-sm"
+                      className="btn-secondary btn-sm whitespace-nowrap"
                       onClick={() =>
                         updateMutation.mutate({
                           id: user.id,
