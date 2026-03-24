@@ -31,7 +31,7 @@ function ShiftHeader({
 
   return (
     <div
-      className={`min-w-[90px] p-1.5 text-center ${isTodayShift ? 'bg-blue-50' : ''}
+      className={`min-w-[60px] sm:min-w-[90px] p-1 sm:p-1.5 text-center ${isTodayShift ? 'bg-blue-50' : ''}
         ${isAdminView ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
       onClick={isAdminView ? onToggleColumn : undefined}
       title={isAdminView ? 'Click to select column' : undefined}
@@ -41,10 +41,17 @@ function ShiftHeader({
         ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
         {allSelected && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
-      <div className="text-[10px] font-semibold text-gray-700 leading-tight">{formatInTimeZone(start, timezone, 'EEEE', { locale: dateLocale })}</div>
-      <div className="text-[10px] text-gray-500 leading-tight">{formatInTimeZone(start, timezone, 'MMM d', { locale: dateLocale })}</div>
+      <div className="text-[10px] font-semibold text-gray-700 leading-tight">
+        <span className="sm:hidden">{formatInTimeZone(start, timezone, 'EEE', { locale: dateLocale })}</span>
+        <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'EEEE', { locale: dateLocale })}</span>
+      </div>
+      <div className="text-[10px] text-gray-500 leading-tight">
+        <span className="sm:hidden">{formatInTimeZone(start, timezone, 'M/d')}</span>
+        <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'MMM d', { locale: dateLocale })}</span>
+      </div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
-        {formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}
+        <span className="sm:hidden">{formatInTimeZone(start, timezone, 'H')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'H')}</span>
+        <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}</span>
       </div>
       <div className={`mt-0.5 text-[10px] font-semibold px-1 py-0.5 rounded-full inline-block
         ${isOver ? 'bg-blue-100 text-blue-700' : isUnder ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -63,7 +70,7 @@ function MemberLabel({
   const { t } = useTranslation();
   return (
     <div
-      className={`min-w-[140px] max-w-[140px] px-2 py-1.5 flex items-center gap-1.5
+      className={`min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 sm:px-2 py-1 sm:py-1.5 flex items-center gap-1 sm:gap-1.5
         ${member.is_fill_in ? 'bg-purple-50' : isMe ? 'bg-blue-50' : 'bg-white'}
         ${isAdminView ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
       onClick={isAdminView ? onToggleRow : undefined}
@@ -76,14 +83,14 @@ function MemberLabel({
       </div>
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1">
-          <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
+          <span className={`text-xs sm:text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
             {member.user.display_name || member.user.name}
           </span>
-          {isMe && <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />{t('grid.you_label')}</span>}
-          {member.user.is_virtual && <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />{t('grid.virtual_label')}</span>}
+          {isMe && <span className="hidden sm:inline-flex items-center gap-1 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />{t('grid.you_label')}</span>}
+          {member.user.is_virtual && <span className="hidden sm:inline-flex items-center gap-1 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />{t('grid.virtual_label')}</span>}
         </div>
         {member.team && (
-          <span className="text-[10px] text-gray-400 truncate">{member.team.name}</span>
+          <span className="hidden sm:block text-[10px] text-gray-400 truncate">{member.team.name}</span>
         )}
       </div>
     </div>
@@ -319,7 +326,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="sticky left-0 z-20 bg-gray-50 border-r border-gray-200 min-w-[140px] max-w-[140px] px-2 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="sticky left-0 z-20 bg-gray-50 border-r border-gray-200 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('grid.member_col')}
               </th>
               {shifts.map((shift) => {
@@ -398,10 +405,10 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                       return (
                         <td
                           key={shift.id}
-                          className={`border-r border-gray-100 p-1.5 ${isTodayShift ? 'bg-blue-50/30' : ''}`}
+                          className={`border-r border-gray-100 p-1 sm:p-1.5 ${isTodayShift ? 'bg-blue-50/30' : ''}`}
                         >
                           {isEditing ? (
-                            <div className="min-w-[90px]">
+                            <div className="min-w-[60px] sm:min-w-[90px]">
                               <select
                                 autoFocus
                                 className="w-full text-xs border border-blue-400 rounded-lg p-1 bg-white shadow-md"

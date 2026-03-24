@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { format, isToday, parseISO, isBefore } from 'date-fns';
 import { he as heLocale, enUS } from 'date-fns/locale';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -96,6 +96,10 @@ export default function Dashboard() {
     : today.getHours() < 17
     ? t('dashboard.greeting_afternoon')
     : t('dashboard.greeting_evening');
+
+  if (!user?.is_admin && !isLoading && activeSchedules.length === 1) {
+    return <Navigate to={`/schedules/${activeSchedules[0].id}`} replace />;
+  }
 
   return (
     <div className="space-y-6">

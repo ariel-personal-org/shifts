@@ -49,14 +49,14 @@ function RequestCard({ request, onCancel }: { request: HomeRequest; onCancel?: (
         <div className="flex items-center gap-2 flex-shrink-0">
           {hasPendingShifts && onCancel && (
             <button
-              className="text-xs text-red-600 hover:text-red-800 hover:underline"
+              className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-800 hover:underline"
               onClick={() => onCancel(request.request_id)}
             >
-              <X className="w-3 h-3 inline" /> {t('my_requests.cancel_request')}
+              <X className="w-3 h-3" /> {t('my_requests.cancel_request')}
             </button>
           )}
           <button
-            className="text-xs text-blue-600 hover:underline"
+            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
             onClick={() => setExpanded((e) => !e)}
           >
             {expanded ? <><ChevronDown className="w-3 h-3" /> {t('my_requests.hide')}</> : <><ChevronRight className="w-3 h-3" /> {t('my_requests.details')}</>}

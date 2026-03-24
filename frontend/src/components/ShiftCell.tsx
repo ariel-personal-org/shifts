@@ -33,7 +33,7 @@ export default function ShiftCell({
 
   return (
     <div
-      className={`relative min-w-[90px] h-16 border rounded-lg p-1.5 flex flex-col items-center justify-center gap-0.5 transition-all
+      className={`relative min-w-[60px] sm:min-w-[90px] h-10 sm:h-16 border rounded-lg p-1 sm:p-1.5 flex flex-col items-center justify-center gap-0.5 transition-all
         ${STATE_STYLES[state]}
         ${isAdmin && !disabled ? 'cursor-pointer hover:opacity-80 hover:shadow-sm' : 'cursor-default'}
         ${disabled ? 'opacity-50' : ''}
@@ -42,10 +42,10 @@ export default function ShiftCell({
     >
       <span className="inline-flex items-center gap-0.5 text-xs font-semibold leading-none">
         {STATE_ICONS[state] && (() => { const Icon = STATE_ICONS[state]!; return <Icon className="w-3 h-3" />; })()}
-        {t(`shifts.${state}`)}
+        <span className="hidden sm:inline">{t(`shifts.${state}`)}</span>
       </span>
       {hasPendingRequest && (
-        <span className="flex items-center gap-0.5 text-[9px] font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-200 mt-0.5">
+        <span className="flex items-center gap-0.5 text-[9px] font-medium text-amber-700 bg-amber-100 px-1 sm:px-1.5 py-0.5 rounded-full border border-amber-200 mt-0.5">
           <Clock className="w-2 h-2" />
           {t('shifts.pending')}
         </span>
