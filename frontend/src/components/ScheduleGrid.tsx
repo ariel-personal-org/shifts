@@ -6,6 +6,7 @@ import ShiftCell from './ShiftCell';
 import { useAuth } from '../context/AuthContext';
 import { schedulesApi } from '../api/schedules';
 import { useQueryClient } from '@tanstack/react-query';
+import { Check, AlertCircle, Star, Monitor, ArrowLeftRight } from 'lucide-react';
 
 interface ScheduleGridProps {
   data: GridData;
@@ -40,7 +41,7 @@ function ShiftHeader({
       <div className={`w-3.5 h-3.5 rounded border mx-auto mb-0.5 flex items-center justify-center transition-opacity
         ${isSelectMode ? 'opacity-100' : 'opacity-0'}
         ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
-        {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+        {allSelected && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
       <div className="text-[10px] text-gray-500 leading-tight">{formatInTimeZone(start, timezone, 'MMM d')}</div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
@@ -71,19 +72,20 @@ function MemberLabel({
       <div className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center transition-opacity
         ${isSelectMode ? 'opacity-100' : 'opacity-0'}
         ${allSelected ? 'bg-amber-400 border-amber-500' : 'border-gray-300 bg-white'}`}>
-        {allSelected && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+        {allSelected && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1">
           <span className={`text-sm font-medium truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
             {member.user.name}
           </span>
-          {isMe && <span className="text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0">You</span>}
-          {member.user.is_virtual && <span className="text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0">Virtual</span>}
+          {isMe && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Star className="w-2 h-2" />You</span>}
+          {member.user.is_virtual && <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded-full leading-none flex-shrink-0"><Monitor className="w-2 h-2" />Virtual</span>}
         </div>
         <div className="flex items-center gap-1 flex-wrap mt-0.5">
           {member.is_fill_in && (
             <span className="badge badge-purple text-[9px]">
+              <ArrowLeftRight className="w-2 h-2" />
               Fill-in{member.team ? ` · ${member.team.name}` : ''}
             </span>
           )}
@@ -294,9 +296,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
           ) : hasPendingChanges ? (
             /* ── Pending changes: amber bar ── */
             <div className="flex-1 flex items-center gap-3 bg-amber-500 text-white rounded-xl px-4 shadow-md">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm font-semibold whitespace-nowrap">
                 {Object.keys(pendingChanges).length} unsaved change{Object.keys(pendingChanges).length !== 1 ? 's' : ''}
               </span>

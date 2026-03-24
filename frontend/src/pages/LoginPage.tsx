@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/auth';
+import { CalendarCheck, CalendarOff, Users } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -35,15 +36,15 @@ export default function LoginPage() {
 
         <div className="mb-8 space-y-4">
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold flex-shrink-0">✓</div>
+            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0"><CalendarCheck className="w-4 h-4" /></div>
             <span>Manage shift schedules</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold flex-shrink-0">✓</div>
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><CalendarOff className="w-4 h-4" /></div>
             <span>Request time off</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold flex-shrink-0">✓</div>
+            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><Users className="w-4 h-4" /></div>
             <span>Track your team</span>
           </div>
         </div>

@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { format, parseISO, isBefore, isAfter } from 'date-fns';
 import { schedulesApi } from '../../api/schedules';
 import type { Schedule } from '../../types';
+import { CircleCheck, CalendarClock, CircleOff, Plus, ArrowRight } from 'lucide-react';
 
 function statusBadge(s: Schedule) {
   const today = new Date();
   const start = parseISO(s.start_date);
   const end = parseISO(s.end_date + 'T23:59:59');
-  if (isBefore(end, today)) return <span className="badge badge-gray">Ended</span>;
-  if (isAfter(start, today)) return <span className="badge badge-blue">Upcoming</span>;
-  return <span className="badge badge-green">Active</span>;
+  if (isBefore(end, today)) return <span className="badge badge-gray"><CircleOff className="w-3 h-3" />Ended</span>;
+  if (isAfter(start, today)) return <span className="badge badge-blue"><CalendarClock className="w-3 h-3" />Upcoming</span>;
+  return <span className="badge badge-green"><CircleCheck className="w-3 h-3" />Active</span>;
 }
 
 export default function AdminSchedules() {
@@ -23,14 +24,14 @@ export default function AdminSchedules() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Schedules</h1>
-        <Link to="/admin/schedules/new" className="btn-primary">+ New Schedule</Link>
+        <Link to="/admin/schedules/new" className="btn-primary"><Plus className="w-4 h-4" /> New Schedule</Link>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>
       ) : schedules.length === 0 ? (
         <div className="card p-8 text-center text-gray-500">
-          No schedules yet. <Link to="/admin/schedules/new" className="text-blue-600 hover:underline">Create one →</Link>
+          No schedules yet. <Link to="/admin/schedules/new" className="inline-flex items-center gap-1 text-blue-600 hover:underline">Create one <ArrowRight className="w-3 h-3" /></Link>
         </div>
       ) : (
         <div className="card divide-y divide-gray-100">
@@ -50,7 +51,7 @@ export default function AdminSchedules() {
                 </div>
               </div>
               <Link to={`/admin/schedules/${schedule.id}`} className="btn-secondary btn-sm">
-                Manage →
+                Manage <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           ))}

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { addHours } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 import type { GridData, Schedule } from '../types';
+import { X, AlertTriangle } from 'lucide-react';
 
 interface Props {
   schedule: Schedule;
@@ -85,11 +86,11 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-gray-900">Advanced Schedule Settings</h2>
           <button
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-gray-400 hover:text-gray-600"
             onClick={onClose}
             disabled={isSaving}
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -147,8 +148,8 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
 
           {hasChanges && impact.deletedCount > 0 && (
             <div className="text-sm bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 space-y-1">
-              <div className="font-medium text-amber-800">
-                ⚠ {impact.deletedCount} shift{impact.deletedCount !== 1 ? 's' : ''} will be removed
+              <div className="flex items-center gap-1 font-medium text-amber-800">
+                <AlertTriangle className="w-4 h-4" /> {impact.deletedCount} shift{impact.deletedCount !== 1 ? 's' : ''} will be removed
               </div>
               {impact.assignments > 0 && (
                 <div className="text-amber-700">
@@ -177,7 +178,7 @@ export default function AdvancedScheduleModal({ schedule, grid, onClose, onSave,
 
         <div className="flex justify-end gap-2 mt-6">
           <button className="btn-secondary" onClick={onClose} disabled={isSaving}>
-            Cancel
+            <X className="w-3.5 h-3.5" /> Cancel
           </button>
           {impact.deletedCount > 0 ? (
             <button

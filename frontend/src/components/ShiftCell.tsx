@@ -1,4 +1,6 @@
 import type { ShiftState } from '../types';
+import { UserCheck, Home, Clock, ChevronDown } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface ShiftCellProps {
   state: ShiftState;
@@ -20,6 +22,11 @@ const STATE_LABELS: Record<ShiftState, string> = {
   home: 'Home',
 };
 
+const STATE_ICONS: Partial<Record<ShiftState, LucideIcon>> = {
+  in_shift: UserCheck,
+  home: Home,
+};
+
 export default function ShiftCell({
   state,
   hasPendingRequest,
@@ -36,19 +43,18 @@ export default function ShiftCell({
       `}
       onClick={isAdmin && !disabled ? onClick : undefined}
     >
-      <span className="text-xs font-semibold leading-none">{STATE_LABELS[state]}</span>
+      <span className="inline-flex items-center gap-0.5 text-xs font-semibold leading-none">
+        {STATE_ICONS[state] && (() => { const Icon = STATE_ICONS[state]!; return <Icon className="w-3 h-3" />; })()}
+        {STATE_LABELS[state]}
+      </span>
       {hasPendingRequest && (
         <span className="flex items-center gap-0.5 text-[9px] font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-200 mt-0.5">
-          <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-          </svg>
+          <Clock className="w-2 h-2" />
           Pending
         </span>
       )}
       {isAdmin && (
-        <svg className="w-2.5 h-2.5 absolute bottom-1 right-1 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <ChevronDown className="w-2.5 h-2.5 absolute bottom-1 right-1 opacity-30" />
       )}
     </div>
   );

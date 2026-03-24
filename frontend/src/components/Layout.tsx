@@ -2,20 +2,26 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
+import type { LucideIcon } from 'lucide-react';
+import {
+  LayoutDashboard, FileText, History, Calendar, UsersRound, UserCog,
+  Inbox, ScrollText, LogOut, Menu, X,
+} from 'lucide-react';
 
-function NavItem({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) {
+function NavItem({ to, children, onClick, icon: Icon }: { to: string; children: React.ReactNode; onClick?: () => void; icon?: LucideIcon }) {
   return (
     <NavLink
       to={to}
       onClick={onClick}
       className={({ isActive }) =>
-        `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+        `inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
           isActive
             ? 'bg-blue-50 text-blue-700'
             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
         }`
       }
     >
+      {Icon && <Icon className="w-4 h-4" />}
       {children}
     </NavLink>
   );
@@ -44,9 +50,9 @@ export default function Layout() {
               <span className="font-bold text-blue-600 text-lg tracking-tight">ShiftSync</span>
               {/* User Nav — desktop only */}
               <nav className="hidden md:flex items-center gap-1">
-                <NavItem to="/dashboard">Dashboard</NavItem>
-                <NavItem to="/my-requests">My Requests</NavItem>
-                <NavItem to="/my-history">My History</NavItem>
+                <NavItem to="/dashboard" icon={LayoutDashboard}>Dashboard</NavItem>
+                <NavItem to="/my-requests" icon={FileText}>My Requests</NavItem>
+                <NavItem to="/my-history" icon={History}>My History</NavItem>
               </nav>
             </div>
 
@@ -55,11 +61,11 @@ export default function Layout() {
               {/* Admin Nav — desktop only */}
               {user?.is_admin && (
                 <nav className="hidden md:flex items-center gap-1 border-l border-gray-200 pl-2 ml-2">
-                  <NavItem to="/admin/schedules">Schedules</NavItem>
-                  <NavItem to="/admin/teams">Teams</NavItem>
-                  <NavItem to="/admin/users">Users</NavItem>
-                  <NavItem to="/admin/requests">Requests</NavItem>
-                  <NavItem to="/admin/audit-log">Audit</NavItem>
+                  <NavItem to="/admin/schedules" icon={Calendar}>Schedules</NavItem>
+                  <NavItem to="/admin/teams" icon={UsersRound}>Teams</NavItem>
+                  <NavItem to="/admin/users" icon={UserCog}>Users</NavItem>
+                  <NavItem to="/admin/requests" icon={Inbox}>Requests</NavItem>
+                  <NavItem to="/admin/audit-log" icon={ScrollText}>Audit</NavItem>
                 </nav>
               )}
               <NotificationBell />
@@ -73,8 +79,9 @@ export default function Layout() {
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100"
+                  className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100"
                 >
+                  <LogOut className="w-3.5 h-3.5" />
                   Sign out
                 </button>
               </div>
@@ -85,13 +92,9 @@ export default function Layout() {
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? (
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-5 w-5" />
                 ) : (
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
+                  <Menu className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -101,18 +104,18 @@ export default function Layout() {
         {/* Mobile menu panel */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
-            <NavItem to="/dashboard" onClick={closeMobileMenu}>Dashboard</NavItem>
-            <NavItem to="/my-requests" onClick={closeMobileMenu}>My Requests</NavItem>
-            <NavItem to="/my-history" onClick={closeMobileMenu}>My History</NavItem>
+            <NavItem to="/dashboard" onClick={closeMobileMenu} icon={LayoutDashboard}>Dashboard</NavItem>
+            <NavItem to="/my-requests" onClick={closeMobileMenu} icon={FileText}>My Requests</NavItem>
+            <NavItem to="/my-history" onClick={closeMobileMenu} icon={History}>My History</NavItem>
             {user?.is_admin && (
               <>
                 <div className="border-t border-gray-100 my-2" />
                 <p className="text-xs text-gray-400 px-3 pb-1 font-medium uppercase tracking-wide">Admin</p>
-                <NavItem to="/admin/schedules" onClick={closeMobileMenu}>Schedules</NavItem>
-                <NavItem to="/admin/teams" onClick={closeMobileMenu}>Teams</NavItem>
-                <NavItem to="/admin/users" onClick={closeMobileMenu}>Users</NavItem>
-                <NavItem to="/admin/requests" onClick={closeMobileMenu}>Requests</NavItem>
-                <NavItem to="/admin/audit-log" onClick={closeMobileMenu}>Audit</NavItem>
+                <NavItem to="/admin/schedules" onClick={closeMobileMenu} icon={Calendar}>Schedules</NavItem>
+                <NavItem to="/admin/teams" onClick={closeMobileMenu} icon={UsersRound}>Teams</NavItem>
+                <NavItem to="/admin/users" onClick={closeMobileMenu} icon={UserCog}>Users</NavItem>
+                <NavItem to="/admin/requests" onClick={closeMobileMenu} icon={Inbox}>Requests</NavItem>
+                <NavItem to="/admin/audit-log" onClick={closeMobileMenu} icon={ScrollText}>Audit</NavItem>
               </>
             )}
             <div className="border-t border-gray-100 pt-3 mt-2 flex items-center justify-between">
@@ -122,8 +125,9 @@ export default function Layout() {
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100"
+                className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100"
               >
+                <LogOut className="w-3.5 h-3.5" />
                 Sign out
               </button>
             </div>

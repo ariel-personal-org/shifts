@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { auditLogsApi } from '../api/auditLogs';
 import type { AuditLog } from '../types';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 const ACTION_LABELS: Record<string, string> = {
   state_set: 'State changed',
@@ -30,8 +31,8 @@ function LogRow({ log }: { log: AuditLog }) {
           </span>
         </div>
         {!!(log.old_value_json || log.new_value_json) && (
-          <button className="text-xs text-blue-600 hover:underline" onClick={() => setExpanded(e => !e)}>
-            {expanded ? 'Hide' : 'Details'}
+          <button className="inline-flex items-center gap-0.5 text-xs text-blue-600 hover:underline" onClick={() => setExpanded(e => !e)}>
+            {expanded ? <><ChevronDown className="w-3 h-3" /> Hide</> : <><ChevronRight className="w-3 h-3" /> Details</>}
           </button>
         )}
       </div>

@@ -5,6 +5,7 @@ import { teamsApi } from '../../api/teams';
 import { useAuth } from '../../context/AuthContext';
 import UpgradeVirtualUserModal from '../../components/UpgradeVirtualUserModal';
 import type { User } from '../../types';
+import { Plus, Pencil, Monitor, ArrowUpCircle, Trash2, Shield, Star } from 'lucide-react';
 
 export default function Users() {
   const [search, setSearch] = useState('');
@@ -112,7 +113,7 @@ export default function Users() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Users</h1>
         <button className="btn-secondary" onClick={startAddForm} disabled={showAddForm}>
-          + Add Virtual User
+          <Plus className="w-4 h-4" /> Add Virtual User
         </button>
       </div>
 
@@ -201,13 +202,11 @@ export default function Users() {
                             title="Edit name"
                             aria-label="Edit name"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                         </>
                       )}
-                      <span className="badge badge-yellow text-[9px]">Virtual</span>
+                      <span className="badge badge-yellow text-[9px]"><Monitor className="w-2.5 h-2.5" />Virtual</span>
                     </div>
                   </div>
 
@@ -229,7 +228,7 @@ export default function Users() {
                       ))}
                     </select>
                     <button className="btn-secondary btn-sm" onClick={() => openUpgradeModal(user)}>
-                      Upgrade
+                      <ArrowUpCircle className="w-3.5 h-3.5" /> Upgrade
                     </button>
                     <button
                       className="btn-danger btn-sm"
@@ -240,7 +239,7 @@ export default function Users() {
                       }}
                       disabled={deleteMutation.isPending}
                     >
-                      Delete
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 </div>
@@ -253,8 +252,8 @@ export default function Users() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-900">{user.name}</span>
-                    {user.is_admin && <span className="badge badge-blue text-[9px]">Admin</span>}
-                    {user.id === currentUser?.id && <span className="badge badge-gray text-[9px]">You</span>}
+                    {user.is_admin && <span className="badge badge-blue text-[9px]"><Shield className="w-2.5 h-2.5" />Admin</span>}
+                    {user.id === currentUser?.id && <span className="badge badge-gray text-[9px]"><Star className="w-2.5 h-2.5" />You</span>}
                   </div>
                   <div className="text-xs text-gray-400">{user.email}</div>
                 </div>
@@ -288,7 +287,7 @@ export default function Users() {
                       }
                       disabled={updateMutation.isPending}
                     >
-                      {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                      <Shield className="w-3.5 h-3.5" /> {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
                     </button>
                   )}
                 </div>

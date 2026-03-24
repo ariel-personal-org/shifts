@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { teamsApi } from '../../api/teams';
 import { usersApi } from '../../api/users';
 import type { Team } from '../../types';
+import { Plus, Pencil, Trash2, UserPlus, UserMinus, Shield, Users, ChevronUp } from 'lucide-react';
 
 export default function Teams() {
   const queryClient = useQueryClient();
@@ -92,7 +93,7 @@ export default function Teams() {
             disabled={!newTeamName.trim() || createTeamMutation.isPending}
             onClick={() => createTeamMutation.mutate(newTeamName.trim())}
           >
-            Create
+            <Plus className="w-4 h-4" /> Create
           </button>
         </div>
         {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
@@ -137,19 +138,19 @@ export default function Teams() {
                         }
                       }}
                     >
-                      {expandedTeam === team.id ? 'Collapse' : 'Manage Members'}
+                      {expandedTeam === team.id ? <><ChevronUp className="w-3.5 h-3.5" />Collapse</> : <><Users className="w-3.5 h-3.5" />Manage Members</>}
                     </button>
                     <button
                       className="btn-secondary btn-sm"
                       onClick={() => { setEditingTeam(team.id); setEditName(team.name); }}
                     >
-                      Rename
+                      <Pencil className="w-3.5 h-3.5" /> Rename
                     </button>
                     <button
                       className="btn-danger btn-sm"
                       onClick={() => { if (confirm(`Delete team "${team.name}"?`)) deleteTeamMutation.mutate(team.id); }}
                     >
-                      Delete
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 )}
@@ -188,7 +189,7 @@ export default function Teams() {
                               className="btn-primary btn-sm"
                               onClick={() => addMemberMutation.mutate({ teamId: team.id, userId: u.id })}
                             >
-                              Add
+                              <UserPlus className="w-3.5 h-3.5" /> Add
                             </button>
                           </div>
                         ))}
@@ -205,13 +206,13 @@ export default function Teams() {
                           <div>
                             <span className="text-sm text-gray-900">{m.name}</span>
                             <span className="text-xs text-gray-400 ml-2">{m.email}</span>
-                            {m.is_admin && <span className="badge badge-blue ml-2 text-[9px]">Admin</span>}
+                            {m.is_admin && <span className="badge badge-blue ml-2 text-[9px]"><Shield className="w-2.5 h-2.5" />Admin</span>}
                           </div>
                           <button
                             className="btn-secondary btn-sm"
                             onClick={() => removeMemberMutation.mutate({ teamId: team.id, userId: m.id })}
                           >
-                            Remove
+                            <UserMinus className="w-3.5 h-3.5" /> Remove
                           </button>
                         </div>
                       ))}

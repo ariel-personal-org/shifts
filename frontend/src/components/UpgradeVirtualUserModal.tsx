@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Team, User } from '../types';
+import { X, ArrowUpCircle } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -32,9 +33,7 @@ export default function UpgradeVirtualUserModal({ user, teams, onClose, onSave, 
             className="text-gray-400 hover:text-gray-600 transition-colors"
             aria-label="Close"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -77,7 +76,7 @@ export default function UpgradeVirtualUserModal({ user, teams, onClose, onSave, 
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={!isValid || isSaving}>
-              {isSaving ? 'Upgrading…' : 'Upgrade User'}
+              {isSaving ? 'Upgrading…' : <><ArrowUpCircle className="w-4 h-4" /> Upgrade User</>}
             </button>
           </div>
         </form>

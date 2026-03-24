@@ -5,6 +5,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { schedulesApi } from '../api/schedules';
 import { useAuth } from '../context/AuthContext';
 import type { Schedule } from '../types';
+import { Clock, ArrowRight } from 'lucide-react';
 
 function TodayCard({ schedule, scheduleUrl }: { schedule: Schedule; scheduleUrl: string }) {
   const { data: grid } = useQuery({
@@ -28,7 +29,7 @@ function TodayCard({ schedule, scheduleUrl }: { schedule: Schedule; scheduleUrl:
           to={scheduleUrl}
           className="text-xs text-blue-600 hover:underline"
         >
-          View full schedule →
+          View full schedule <ArrowRight className="w-3 h-3 inline" />
         </Link>
       </div>
       <div className="space-y-2">
@@ -55,7 +56,7 @@ function TodayCard({ schedule, scheduleUrl }: { schedule: Schedule; scheduleUrl:
                 <div className="text-xs text-gray-500">
                   {stat ? `${stat.in_shift_count}/${stat.capacity} filled` : ''}
                   {myState?.has_pending_request && (
-                    <span className="ml-2 text-amber-600">⏳ Home request pending</span>
+                    <span className="inline-flex items-center gap-0.5 ml-2 text-amber-600"><Clock className="w-3 h-3" /> Home request pending</span>
                   )}
                 </div>
               </div>
@@ -102,7 +103,7 @@ export default function Dashboard() {
 
       {!isLoading && activeSchedules.length === 0 && (
         <div className="card p-8 text-center text-gray-500">
-          <p>No active schedules. {user?.is_admin && <Link to="/admin/schedules/new" className="text-blue-600 hover:underline">Create one →</Link>}</p>
+          <p>No active schedules. {user?.is_admin && <Link to="/admin/schedules/new" className="inline-flex items-center gap-1 text-blue-600 hover:underline">Create one <ArrowRight className="w-3 h-3" /></Link>}</p>
         </div>
       )}
 

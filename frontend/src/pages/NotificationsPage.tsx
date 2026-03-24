@@ -2,14 +2,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { notificationsApi } from '../api/notifications';
 import type { Notification } from '../types';
+import type { LucideIcon } from 'lucide-react';
+import { ClipboardList, UserMinus, Home, CheckCircle, XCircle, AlertTriangle, CheckCheck } from 'lucide-react';
 
-const TYPE_LABELS: Record<string, string> = {
-  assigned_in_shift: '📋 Assigned to shift',
-  removed_from_shift: '❌ Removed from shift',
-  state_changed_home: '🏠 Set to Home',
-  request_approved: '✅ Home request approved',
-  request_rejected: '❌ Home request rejected',
-  request_partial: '⚠️ Home request partially decided',
+const TYPE_CONFIG: Record<string, { icon: LucideIcon; label: string; iconClass: string }> = {
+  assigned_in_shift:    { icon: ClipboardList, label: 'Assigned to shift',              iconClass: 'text-green-600' },
+  removed_from_shift:   { icon: UserMinus,     label: 'Removed from shift',             iconClass: 'text-red-500' },
+  state_changed_home:   { icon: Home,          label: 'Set to Home',                    iconClass: 'text-red-600' },
+  request_approved:     { icon: CheckCircle,   label: 'Home request approved',          iconClass: 'text-green-600' },
+  request_rejected:     { icon: XCircle,       label: 'Home request rejected',          iconClass: 'text-red-500' },
+  request_partial:      { icon: AlertTriangle, label: 'Home request partially decided', iconClass: 'text-amber-500' },
 };
 
 function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: number) => void }) {
@@ -20,8 +22,9 @@ function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: number
       }`}
     >
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-gray-900">
-          {TYPE_LABELS[notif.type] ?? notif.type}
+        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+          {TYPE_CONFIG[notif.type] && (() => { const Icon = TYPE_CONFIG[notif.type].icon; return <Icon className={`w-4 h-4 flex-shrink-0 ${TYPE_CONFIG[notif.type].iconClass}`} />; })()}
+          {TYPE_CONFIG[notif.type]?.label ?? notif.type}
         </div>
         <div className="text-xs text-gray-500 mt-0.5">
           {format(parseISO(notif.created_at), 'MMM d, yyyy HH:mm')}
@@ -74,6 +77,7 @@ export default function NotificationsPage() {
             onClick={() => markAllReadMutation.mutate()}
             disabled={markAllReadMutation.isPending}
           >
+            <CheckCheck className="w-3.5 h-3.5" />
             Mark all read
           </button>
         )}

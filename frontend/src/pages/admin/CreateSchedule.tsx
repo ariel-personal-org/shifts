@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { schedulesApi } from '../../api/schedules';
 import { teamsApi } from '../../api/teams';
+import { AlertTriangle, Plus, X } from 'lucide-react';
 
 export default function CreateSchedule() {
   const navigate = useNavigate();
@@ -107,17 +108,17 @@ export default function CreateSchedule() {
               <option key={t.id} value={t.id}>{t.name}</option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">⚠ Cannot be changed after creation.</p>
+          <p className="inline-flex items-center gap-1 text-xs text-gray-500 mt-1"><AlertTriangle className="w-3 h-3 text-amber-500" /> Cannot be changed after creation.</p>
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         <div className="flex gap-3 pt-2">
           <button type="submit" className="btn-primary" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Creating…' : 'Create Schedule'}
+            {mutation.isPending ? 'Creating…' : <><Plus className="w-4 h-4" /> Create Schedule</>}
           </button>
           <button type="button" className="btn-secondary" onClick={() => navigate('/admin/schedules')}>
-            Cancel
+            <X className="w-3.5 h-3.5" /> Cancel
           </button>
         </div>
       </form>

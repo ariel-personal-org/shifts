@@ -7,6 +7,10 @@ import { schedulesApi } from '../../api/schedules';
 import { usersApi } from '../../api/users';
 import ScheduleGrid from '../../components/ScheduleGrid';
 import AdvancedScheduleModal from '../../components/AdvancedScheduleModal';
+import {
+  Zap, Pencil, Settings, Save, X, Check, AlertTriangle,
+  UserPlus, UserMinus, Monitor, ArrowLeftRight,
+} from 'lucide-react';
 
 export default function ScheduleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -122,14 +126,14 @@ export default function ScheduleDetail() {
                   onChange={(e) => setEditCapacity(parseInt(e.target.value))}
                 />
               </div>
-              <button className="btn-primary btn-sm" onClick={() => updateMutation.mutate()}>Save</button>
-              <button className="btn-secondary btn-sm" onClick={() => setIsEditing(false)}>Cancel</button>
+              <button className="btn-primary btn-sm" onClick={() => updateMutation.mutate()}><Save className="w-3.5 h-3.5" />Save</button>
+              <button className="btn-secondary btn-sm" onClick={() => setIsEditing(false)}><X className="w-3.5 h-3.5" />Cancel</button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{schedule.name}</h1>
-              <button className="btn-secondary btn-sm" onClick={startEdit}>Edit</button>
-              <button className="btn-secondary btn-sm" onClick={() => setShowAdvanced(true)}>Advanced…</button>
+              <button className="btn-secondary btn-sm" onClick={startEdit}><Pencil className="w-3.5 h-3.5" />Edit</button>
+              <button className="btn-secondary btn-sm" onClick={() => setShowAdvanced(true)}><Settings className="w-3.5 h-3.5" />Advanced…</button>
             </div>
           )}
           <p className="text-sm text-gray-500 mt-1">
@@ -145,7 +149,7 @@ export default function ScheduleDetail() {
           onClick={() => { setAutoFillResult(null); autoFillMutation.mutate(); }}
           title={!canAutoFill ? 'No under-capacity shifts or no available members' : 'Greedily fill under-capacity shifts'}
         >
-          {autoFillMutation.isPending ? 'Filling…' : '⚡ Auto-Fill Shifts'}
+          {autoFillMutation.isPending ? 'Filling…' : <><Zap className="w-4 h-4" /> Auto-Fill Shifts</>}
         </button>
       </div>
 
@@ -154,10 +158,10 @@ export default function ScheduleDetail() {
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <div className="font-semibold text-green-800 mb-1">Auto-fill complete</div>
           <div className="text-sm text-green-700 space-y-1">
-            <div>✓ {autoFillResult.assignments_made} assignment{autoFillResult.assignments_made !== 1 ? 's' : ''} made</div>
-            <div>✓ {autoFillResult.shifts_filled.length} shift{autoFillResult.shifts_filled.length !== 1 ? 's' : ''} filled to capacity</div>
+            <div className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-green-600" /> {autoFillResult.assignments_made} assignment{autoFillResult.assignments_made !== 1 ? 's' : ''} made</div>
+            <div className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-green-600" /> {autoFillResult.shifts_filled.length} shift{autoFillResult.shifts_filled.length !== 1 ? 's' : ''} filled to capacity</div>
             {autoFillResult.shifts_still_under.length > 0 && (
-              <div className="text-amber-700">⚠ {autoFillResult.shifts_still_under.length} shift{autoFillResult.shifts_still_under.length !== 1 ? 's' : ''} still under capacity</div>
+              <div className="flex items-center gap-1 text-amber-700"><AlertTriangle className="w-3.5 h-3.5" /> {autoFillResult.shifts_still_under.length} shift{autoFillResult.shifts_still_under.length !== 1 ? 's' : ''} still under capacity</div>
             )}
           </div>
           <button className="text-xs text-green-600 hover:underline mt-2" onClick={() => setAutoFillResult(null)}>Dismiss</button>
@@ -203,7 +207,7 @@ export default function ScheduleDetail() {
                 <div key={u.id} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50">
                   <div>
                     <span className="text-sm font-medium text-gray-900">{u.name}</span>
-                    {u.is_virtual && <span className="badge badge-yellow text-[9px] ml-1">Virtual</span>}
+                    {u.is_virtual && <span className="badge badge-yellow text-[9px] ml-1"><Monitor className="w-2.5 h-2.5" />Virtual</span>}
                     {!u.is_virtual && <span className="text-xs text-gray-400 ml-2">{u.email}</span>}
                   </div>
                   {isMember ? (
@@ -214,6 +218,7 @@ export default function ScheduleDetail() {
                       onClick={() => addMemberMutation.mutate(u.id)}
                       disabled={addMemberMutation.isPending}
                     >
+                      <UserPlus className="w-3.5 h-3.5" />
                       Add
                     </button>
                   )}
@@ -230,16 +235,17 @@ export default function ScheduleDetail() {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-900">{m.user.name}</span>
                 {m.user.is_virtual
-                  ? <span className="badge badge-yellow text-[9px]">Virtual</span>
+                  ? <span className="badge badge-yellow text-[9px]"><Monitor className="w-2.5 h-2.5" />Virtual</span>
                   : <span className="text-xs text-gray-400">{m.user.email}</span>
                 }
-                {m.is_fill_in && <span className="badge badge-purple text-[9px]">Fill-in</span>}
+                {m.is_fill_in && <span className="badge badge-purple text-[9px]"><ArrowLeftRight className="w-2.5 h-2.5" />Fill-in</span>}
               </div>
               <button
                 className="btn-danger btn-sm"
                 onClick={() => removeMemberMutation.mutate(m.user.id)}
                 disabled={removeMemberMutation.isPending}
               >
+                <UserMinus className="w-3.5 h-3.5" />
                 Remove
               </button>
             </div>

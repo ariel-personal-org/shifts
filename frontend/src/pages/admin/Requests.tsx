@@ -6,6 +6,15 @@ import { homeRequestsApi } from '../../api/homeRequests';
 import { schedulesApi } from '../../api/schedules';
 import { usersApi } from '../../api/users';
 import type { HomeRequest, HomeDecision, RequestStatus } from '../../types';
+import type { LucideIcon } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertTriangle, CheckCheck, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
+
+const STATUS_ICONS: Record<RequestStatus, LucideIcon> = {
+  pending: Clock,
+  partial: AlertTriangle,
+  approved: CheckCircle,
+  rejected: XCircle,
+};
 
 const STATUS_STYLES: Record<RequestStatus, string> = {
   pending: 'badge-yellow',
@@ -38,7 +47,7 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
     <div className="card overflow-hidden">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <span className={STATUS_STYLES[request.status]}>{request.status}</span>
+          <span className={STATUS_STYLES[request.status]}>{(() => { const Icon = STATUS_ICONS[request.status]; return <Icon className="w-3 h-3" />; })()}{request.status}</span>
           <div>
             <span className="font-medium text-gray-900">{userName}</span>
             <span className="text-xs text-gray-400 ml-2">
@@ -49,12 +58,12 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
         <div className="flex items-center gap-2">
           {pendingShifts.length > 0 && (
             <>
-              <button className="btn-primary btn-sm" onClick={() => handleApplyAll('approved')}>Approve All</button>
-              <button className="btn-danger btn-sm" onClick={() => handleApplyAll('rejected')}>Reject All</button>
+              <button className="btn-primary btn-sm" onClick={() => handleApplyAll('approved')}><CheckCheck className="w-3.5 h-3.5" />Approve All</button>
+              <button className="btn-danger btn-sm" onClick={() => handleApplyAll('rejected')}><XCircle className="w-3.5 h-3.5" />Reject All</button>
             </>
           )}
           <button className="btn-secondary btn-sm" onClick={() => setExpanded((e) => !e)}>
-            {expanded ? 'Collapse' : 'Details'}
+            {expanded ? <><ChevronDown className="w-3.5 h-3.5" />Collapse</> : <><ChevronRight className="w-3.5 h-3.5" />Details</>}
           </button>
         </div>
       </div>
@@ -78,7 +87,7 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
                         setLocalDecisions((prev) => ({ ...prev, [s.shift_id]: d as any }));
                       }}
                     >
-                      ✓
+                      <Check className="w-3.5 h-3.5" />
                     </button>
                     <button
                       className={`btn-sm ${localDecisions[s.shift_id] === 'rejected' ? 'btn-danger' : 'btn-secondary'}`}
@@ -87,7 +96,7 @@ function RequestRow({ request, onDecide }: { request: HomeRequest; onDecide: (re
                         setLocalDecisions((prev) => ({ ...prev, [s.shift_id]: d as any }));
                       }}
                     >
-                      ✗
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}

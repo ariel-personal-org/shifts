@@ -6,6 +6,15 @@ import { schedulesApi } from '../api/schedules';
 import { homeRequestsApi } from '../api/homeRequests';
 import { useAuth } from '../context/AuthContext';
 import type { HomeRequest, RequestStatus } from '../types';
+import type { LucideIcon } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertTriangle, Plus, Send, X, ChevronDown, ChevronRight } from 'lucide-react';
+
+const STATUS_ICONS: Record<RequestStatus, LucideIcon> = {
+  pending: Clock,
+  partial: AlertTriangle,
+  approved: CheckCircle,
+  rejected: XCircle,
+};
 
 const STATUS_STYLES: Record<RequestStatus, string> = {
   pending: 'badge-yellow',
@@ -26,7 +35,7 @@ function RequestCard({ request }: { request: HomeRequest }) {
     <div className="card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={STATUS_STYLES[request.status]}>{request.status}</span>
+          <span className={STATUS_STYLES[request.status]}>{(() => { const Icon = STATUS_ICONS[request.status]; return <Icon className="w-3 h-3" />; })()}{request.status}</span>
           <span className="text-sm text-gray-600">
             {request.shifts.length} shift{request.shifts.length !== 1 ? 's' : ''}
           </span>
@@ -38,7 +47,7 @@ function RequestCard({ request }: { request: HomeRequest }) {
           className="text-xs text-blue-600 hover:underline flex-shrink-0"
           onClick={() => setExpanded((e) => !e)}
         >
-          {expanded ? 'Hide' : 'Details'}
+          {expanded ? <><ChevronDown className="w-3 h-3" /> Hide</> : <><ChevronRight className="w-3 h-3" /> Details</>}
         </button>
       </div>
 
@@ -119,7 +128,7 @@ export default function MyRequests() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-900">My Home Requests</h1>
         <button className="btn-primary self-start sm:self-auto" onClick={() => setShowForm(true)}>
-          + New Request
+          <Plus className="w-4 h-4" /> New Request
         </button>
       </div>
 
@@ -189,10 +198,10 @@ export default function MyRequests() {
               disabled={selectedShiftIds.length === 0 || createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
-              {createMutation.isPending ? 'Submitting…' : `Submit Request (${selectedShiftIds.length} shifts)`}
+              {createMutation.isPending ? 'Submitting…' : <><Send className="w-3.5 h-3.5" /> Submit Request ({selectedShiftIds.length} shifts)</>}
             </button>
             <button className="btn-secondary" onClick={() => { setShowForm(false); setSelectedShiftIds([]); setSelectedScheduleId(null); }}>
-              Cancel
+              <X className="w-3.5 h-3.5" /> Cancel
             </button>
           </div>
 

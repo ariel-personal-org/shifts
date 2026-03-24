@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { schedulesApi } from '../api/schedules';
 import { useAuth } from '../context/AuthContext';
 import ScheduleGrid from '../components/ScheduleGrid';
+import { Home, AlertTriangle } from 'lucide-react';
 
 export default function ScheduleView() {
   const { id } = useParams<{ id: string }>();
@@ -65,7 +66,7 @@ export default function ScheduleView() {
         <div className="flex gap-2 sm:flex-shrink-0">
           {myMember && (
             <Link to="/my-requests" className="btn-secondary btn-sm">
-              Request Home
+              <Home className="w-3.5 h-3.5" /> Request Home
             </Link>
           )}
         </div>
@@ -73,7 +74,8 @@ export default function ScheduleView() {
 
       {/* Not a member notice */}
       {!myMember && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+        <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+          <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
           You are not a member of this schedule. Contact an admin to be added.
         </div>
       )}
