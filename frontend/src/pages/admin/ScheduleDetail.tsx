@@ -9,9 +9,10 @@ import ScheduleGrid from '../../components/ScheduleGrid';
 import AdvancedScheduleModal from '../../components/AdvancedScheduleModal';
 import {
   Zap, Pencil, Settings, Save, X, Check, AlertTriangle,
-  UserPlus, UserMinus, Monitor, ArrowLeftRight,
+  UserPlus, UserMinus, Monitor, ArrowLeftRight, Download,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import ExportModal from '../../components/ExportModal';
 
 export default function ScheduleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,7 @@ export default function ScheduleDetail() {
   const [editCapacity, setEditCapacity] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   const { data: grid, isLoading } = useQuery({
     queryKey: ['grid', scheduleId],
@@ -145,14 +147,22 @@ export default function ScheduleDetail() {
           </p>
         </div>
 
-        <button
-          className="btn-primary self-start"
-          disabled={!canAutoFill || autoFillMutation.isPending}
-          onClick={() => { setAutoFillResult(null); autoFillMutation.mutate(); }}
-          title={!canAutoFill ? t('schedule_detail.auto_fill_tooltip_disabled') : t('schedule_detail.auto_fill_tooltip')}
-        >
-          {autoFillMutation.isPending ? t('schedule_detail.filling') : <><Zap className="w-4 h-4" /> {t('schedule_detail.auto_fill')}</>}
-        </button>
+        <div className="flex flex-col gap-2 self-start">
+          <button
+            className="btn-primary"
+            disabled={!canAutoFill || autoFillMutation.isPending}
+            onClick={() => { setAutoFillResult(null); autoFillMutation.mutate(); }}
+            title={!canAutoFill ? t('schedule_detail.auto_fill_tooltip_disabled') : t('schedule_detail.auto_fill_tooltip')}
+          >
+            {autoFillMutation.isPending ? t('schedule_detail.filling') : <><Zap className="w-4 h-4" /> {t('schedule_detail.auto_fill')}</>}
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={() => setShowExport(true)}
+          >
+            <Download className="w-4 h-4" /> {t('schedule_detail.export_btn')}
+          </button>
+        </div>
       </div>
 
       {/* Auto-fill result */}
@@ -185,6 +195,10 @@ export default function ScheduleDetail() {
           onSave={(updates) => advancedMutation.mutate(updates)}
           isSaving={advancedMutation.isPending}
         />
+      )}
+
+      {showExport && (
+        <ExportModal grid={grid} onClose={() => setShowExport(false)} />
       )}
 
       {/* Member management */}
