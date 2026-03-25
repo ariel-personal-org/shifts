@@ -263,7 +263,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
 
       {/* Action bar — fixed height slot, always reserves space in admin view to avoid layout shift */}
       {isAdminView && (
-        <div className="h-12 mb-3 flex items-stretch">
+        <div className="sticky top-14 z-30 bg-gray-50 h-12 mb-3 flex items-stretch">
           {isSelectMode ? (
             /* ── Selection mode: blue bar ── */
             <div className="flex-1 flex items-center gap-3 bg-blue-600 text-white rounded-xl px-4 shadow-md">
@@ -328,11 +328,11 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
       )}
 
       {/* Scrollable grid */}
-      <div ref={scrollRef} className="overflow-auto rounded-xl border border-gray-200 shadow-sm" dir="ltr">
+      <div ref={scrollRef} className="overflow-auto rounded-xl border border-gray-200 shadow-sm max-h-[calc(100vh-18rem)]" dir="ltr">
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="sticky left-0 z-20 bg-gray-50 border-r border-gray-200 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="sticky left-0 top-0 z-30 bg-gray-50 border-r border-b border-gray-200 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('grid.member_col')}
               </th>
               {shifts.map((shift) => {
@@ -340,7 +340,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 return (
                   <th
                     key={shift.id}
-                    className={`border-r border-gray-200 ${isTodayShift ? 'bg-blue-50' : 'bg-gray-50'}`}
+                    className={`sticky top-0 z-10 border-r border-b border-gray-200 ${isTodayShift ? 'bg-blue-50' : 'bg-gray-50'}`}
                   >
                     <ShiftHeader
                       shift={shift}
