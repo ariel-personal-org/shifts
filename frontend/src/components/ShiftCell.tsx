@@ -33,7 +33,7 @@ export default function ShiftCell({
 
   return (
     <div
-      className={`relative min-w-[60px] sm:min-w-[90px] h-10 sm:h-16 border rounded-lg p-1 sm:p-1.5 flex flex-col items-center justify-center gap-0.5 transition-all
+      className={`relative min-w-[60px] sm:min-w-[90px] h-10 sm:h-12 border rounded-lg p-1 flex flex-col items-center justify-center gap-0.5 transition-all
         ${STATE_STYLES[state]}
         ${isAdmin && !disabled ? 'cursor-pointer hover:opacity-80 hover:shadow-sm' : 'cursor-default'}
         ${disabled ? 'opacity-50' : ''}

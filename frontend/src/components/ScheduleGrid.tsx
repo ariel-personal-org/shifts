@@ -75,7 +75,7 @@ function MemberLabel({
   const { t } = useTranslation();
   return (
     <div
-      className={`min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 sm:px-2 py-1 sm:py-1.5 flex items-center gap-1 sm:gap-1.5
+      className={`min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 sm:px-2 py-1 flex items-center gap-1 sm:gap-1.5
         ${member.is_fill_in ? 'bg-purple-50' : isMe ? 'bg-blue-50' : 'bg-white'}
         ${isAdminView ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''}`}
       onClick={isAdminView ? onToggleRow : undefined}
@@ -460,7 +460,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                       return (
                         <td
                           key={shift.id}
-                          className={`border-r border-gray-100 p-1 sm:p-1.5 ${dayBoundaryShiftIds.has(shift.id) ? 'border-l-2 [border-left-color:#d1d5db]' : ''} ${isTodayShift ? 'bg-blue-50/30' : ''}`}
+                          className={`border-r border-gray-100 p-0.5 sm:p-1 ${dayBoundaryShiftIds.has(shift.id) ? 'border-l-2 [border-left-color:#d1d5db]' : ''} ${isTodayShift ? 'bg-blue-50/30' : ''}`}
                         >
                           {isEditing ? (
                             <div className="min-w-[60px] sm:min-w-[90px]">
