@@ -121,6 +121,15 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const { schedule, shifts, members, shift_stats } = data;
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
+  // Shifts that start a new calendar day → bolder left border
+  const dayBoundaryShiftIds = new Set<number>();
+  shifts.forEach((shift, idx) => {
+    if (idx === 0) return;
+    const prevDay = formatInTimeZone(parseISO(shifts[idx - 1].start_datetime), schedule.timezone, 'yyyy-MM-dd');
+    const currDay = formatInTimeZone(parseISO(shift.start_datetime), schedule.timezone, 'yyyy-MM-dd');
+    if (prevDay !== currDay) dayBoundaryShiftIds.add(shift.id);
+  });
+
   const getStatFor = (shiftId: number) =>
     shift_stats.find((s) => s.shift_id === shiftId) ?? { in_shift_count: 0, capacity: schedule.capacity };
 
@@ -332,7 +341,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="sticky left-0 top-0 z-30 bg-gray-50 border-r border-b border-gray-200 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="sticky left-0 top-0 z-30 bg-gray-50 border-r border-b-2 border-gray-300 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('grid.member_col')}
               </th>
               {shifts.map((shift) => {
@@ -340,7 +349,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 return (
                   <th
                     key={shift.id}
-                    className={`sticky top-0 z-10 border-r border-b border-gray-200 ${isTodayShift ? 'bg-blue-50' : 'bg-gray-50'}`}
+                    className={`sticky top-0 z-10 border-r border-b-2 border-gray-300 ${dayBoundaryShiftIds.has(shift.id) ? 'border-l-2 [border-left-color:#d1d5db]' : ''} ${isTodayShift ? 'bg-blue-50' : 'bg-gray-50'}`}
                   >
                     <ShiftHeader
                       shift={shift}
@@ -367,7 +376,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                 <>
                   {isPrimaryBoundary && (
                     <tr key={`divider-${memberIdx}`}>
-                      <td className="sticky left-0 z-10 bg-gray-100 border-y border-gray-200 px-3 py-1">
+                      <td className="sticky left-0 z-10 bg-gray-100 border-y border-r-2 border-gray-200 border-r-gray-300 px-3 py-1">
                         <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                           {t('grid.fill_in_divider')}
                         </span>
@@ -382,7 +391,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                     }`}
                   >
                     {/* Sticky name cell */}
-                    <td className={`sticky left-0 z-10 border-r border-gray-200 ${
+                    <td className={`sticky left-0 z-10 border-r-2 border-r-gray-300 ${
                       isMe ? 'border-l-2 border-l-blue-400 bg-blue-50' : member.is_fill_in ? 'bg-purple-50' : 'bg-white'
                     }`}>
                       <MemberLabel
@@ -411,7 +420,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                       return (
                         <td
                           key={shift.id}
-                          className={`border-r border-gray-100 p-1 sm:p-1.5 ${isTodayShift ? 'bg-blue-50/30' : ''}`}
+                          className={`border-r border-gray-100 p-1 sm:p-1.5 ${dayBoundaryShiftIds.has(shift.id) ? 'border-l-2 [border-left-color:#d1d5db]' : ''} ${isTodayShift ? 'bg-blue-50/30' : ''}`}
                         >
                           {isEditing ? (
                             <div className="min-w-[60px] sm:min-w-[90px]">
