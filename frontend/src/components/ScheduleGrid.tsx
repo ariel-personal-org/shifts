@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { isToday, parseISO } from 'date-fns';
+import { isToday, isBefore, startOfDay, parseISO } from 'date-fns';
 import { he as heLocale, enUS } from 'date-fns/locale';
 import { formatInTimeZone } from 'date-fns-tz';
 import type { GridData, ShiftState, MemberRow, Shift } from '../types';
@@ -46,8 +46,7 @@ function ShiftHeader({
         <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'EEEE', { locale: dateLocale })}</span>
       </div>
       <div className="text-[10px] text-gray-500 leading-tight">
-        <span className="sm:hidden">{formatInTimeZone(start, timezone, 'M/d')}</span>
-        <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'MMM d', { locale: dateLocale })}</span>
+        {formatInTimeZone(start, timezone, 'dd/MM')}
       </div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
         <span className="sm:hidden">{formatInTimeZone(start, timezone, 'H')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'H')}</span>
@@ -102,6 +101,9 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Hide past shifts toggle
+  const [hideOldShifts, setHideOldShifts] = useState(false);
+
   // Edit mode state
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, ShiftState>>({});
@@ -118,7 +120,11 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
     affectedNames: string[];
   } | null>(null);
 
-  const { schedule, shifts, members, shift_stats } = data;
+  const { schedule, shifts: allShifts, members, shift_stats } = data;
+  const today = startOfDay(new Date());
+  const shifts = hideOldShifts
+    ? allShifts.filter((s) => !isBefore(startOfDay(parseISO(s.start_datetime)), today))
+    : allShifts;
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   // Shifts that start a new calendar day → bolder left border
@@ -341,8 +347,19 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
         <table className="border-collapse" style={{ minWidth: 'max-content' }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="sticky left-0 top-0 z-30 bg-gray-50 border-r border-b-2 border-gray-300 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {t('grid.member_col')}
+              <th className="sticky left-0 top-0 z-30 bg-gray-50 border-r border-b-2 border-gray-300 min-w-[100px] max-w-[100px] sm:min-w-[140px] sm:max-w-[140px] px-1 py-1 sm:px-2 sm:py-2 text-left">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider leading-none mb-1">{t('grid.member_col')}</div>
+                <button
+                  role="switch"
+                  aria-checked={hideOldShifts}
+                  onClick={() => setHideOldShifts((v) => !v)}
+                  className="flex items-center gap-1 group"
+                >
+                  <span className={`relative inline-flex h-3.5 w-6 flex-shrink-0 rounded-full border border-transparent transition-colors duration-200 ${hideOldShifts ? 'bg-blue-500' : 'bg-gray-300'}`}>
+                    <span className={`pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform transition-transform duration-200 ${hideOldShifts ? 'translate-x-2.5' : 'translate-x-0'}`} />
+                  </span>
+                  <span className="text-[9px] text-gray-400 group-hover:text-gray-600 transition-colors leading-none whitespace-nowrap">{t('grid.hide_past_label')}</span>
+                </button>
               </th>
               {shifts.map((shift) => {
                 const isTodayShift = isToday(parseISO(shift.start_datetime));

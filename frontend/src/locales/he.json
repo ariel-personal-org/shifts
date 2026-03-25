@@ -307,7 +307,8 @@
     "stage_anyway": "בצע בכל זאת",
     "fill_in_divider": "ממלאי מקום",
     "you_label": "אתה",
-    "virtual_label": "וירטואלי"
+    "virtual_label": "וירטואלי",
+    "hide_past_label": "מהיום והלאה"
   },
   "advanced_modal": {
     "title": "הגדרות לוח זמנים מתקדמות",

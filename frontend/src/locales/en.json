@@ -307,7 +307,8 @@
     "stage_anyway": "Stage Anyway",
     "fill_in_divider": "Fill-in Members",
     "you_label": "You",
-    "virtual_label": "Virtual"
+    "virtual_label": "Virtual",
+    "hide_past_label": "Today onwards"
   },
   "advanced_modal": {
     "title": "Advanced Schedule Settings",
