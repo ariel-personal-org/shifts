@@ -29,7 +29,7 @@ export default function Teams() {
   const { data: searchResults = [] } = useQuery({
     queryKey: ['users', 'search', userSearch],
     queryFn: () => usersApi.list(userSearch),
-    enabled: userSearch.length >= 2,
+    enabled: userSearch.length >= 1,
   });
 
   const createTeamMutation = useMutation({
@@ -172,7 +172,7 @@ export default function Teams() {
                       onChange={(e) => setUserSearch(e.target.value)}
                     />
                   </div>
-                  {userSearch.length >= 2 && searchResults.length > 0 && (
+                  {userSearch.length >= 1 && searchResults.length > 0 && (
                     <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 mb-3 overflow-hidden">
                       {searchResults
                         .filter((u) => !expandedTeamData.members.some((m) => m.id === u.id))

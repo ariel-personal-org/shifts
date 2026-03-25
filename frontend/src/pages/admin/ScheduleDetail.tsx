@@ -40,7 +40,7 @@ export default function ScheduleDetail() {
   const { data: searchResults = [] } = useQuery({
     queryKey: ['users', 'search', userSearch],
     queryFn: () => usersApi.list(userSearch),
-    enabled: userSearch.length >= 2,
+    enabled: userSearch.length >= 1,
   });
 
   const addMemberMutation = useMutation({
@@ -215,7 +215,7 @@ export default function ScheduleDetail() {
           />
         </div>
 
-        {userSearch.length >= 2 && searchResults.length > 0 && (
+        {userSearch.length >= 1 && searchResults.length > 0 && (
           <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 mb-4 overflow-hidden">
             {searchResults.map((u) => {
               const isMember = memberIds.has(u.id);

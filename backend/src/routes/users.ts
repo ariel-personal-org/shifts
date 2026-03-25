@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { eq, ilike, or } from 'drizzle-orm';
+import { and, eq, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db';
 import { users } from '../db/schema';
@@ -18,7 +18,11 @@ router.get('/', requireAuth, async (req, res) => {
       result = await db
         .select()
         .from(users)
-        .where(or(ilike(users.name, `%${q}%`), ilike(users.email, `%${q}%`)))
+        .where(or(
+          ilike(users.name, `%${q}%`),
+          ilike(users.display_name, `%${q}%`),
+          and(eq(users.is_virtual, false), ilike(users.email, `%${q}%`))
+        ))
         .orderBy(users.name);
     } else {
       result = await db.select().from(users).orderBy(users.name);
