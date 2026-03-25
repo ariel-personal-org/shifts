@@ -308,7 +308,9 @@
     "fill_in_divider": "ממלאי מקום",
     "you_label": "אתה",
     "virtual_label": "וירטואלי",
-    "hide_past_label": "מהיום והלאה"
+    "hide_past_label": "מהיום והלאה",
+    "shift_day": "יום",
+    "shift_night": "לילה"
   },
   "advanced_modal": {
     "title": "הגדרות לוח זמנים מתקדמות",

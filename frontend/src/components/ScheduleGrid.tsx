@@ -17,12 +17,13 @@ interface ScheduleGridProps {
 }
 
 function ShiftHeader({
-  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView, timezone,
+  shift, inShiftCount, capacity, isSelectMode, allSelected, onToggleColumn, isAdminView, timezone, shiftLabel,
 }: {
   shift: Shift; inShiftCount: number; capacity: number;
   isSelectMode: boolean; allSelected: boolean; onToggleColumn: () => void; isAdminView: boolean; timezone: string;
+  shiftLabel?: 'day' | 'night';
 }) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const dateLocale = i18n.language === 'he' ? heLocale : enUS;
   const start = parseISO(shift.start_datetime);
   const isTodayShift = isToday(start);
@@ -49,8 +50,13 @@ function ShiftHeader({
         {formatInTimeZone(start, timezone, 'dd/MM')}
       </div>
       <div className="text-[10px] font-medium text-gray-700 leading-tight">
-        <span className="sm:hidden">{formatInTimeZone(start, timezone, 'H')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'H')}</span>
-        <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}</span>
+        {shiftLabel
+          ? t(`grid.shift_${shiftLabel}`)
+          : <>
+              <span className="sm:hidden">{formatInTimeZone(start, timezone, 'H')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'H')}</span>
+              <span className="hidden sm:inline">{formatInTimeZone(start, timezone, 'HH:mm')}–{formatInTimeZone(parseISO(shift.end_datetime), timezone, 'HH:mm')}</span>
+            </>
+        }
       </div>
       <div className={`mt-0.5 text-[10px] font-semibold px-1 py-0.5 rounded-full inline-block
         ${isOver ? 'bg-blue-100 text-blue-700' : isUnder ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -126,6 +132,22 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
     ? allShifts.filter((s) => !isBefore(startOfDay(parseISO(s.start_datetime)), today))
     : allShifts;
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+
+  // Day/Night labels: if a calendar day has exactly 2 shifts, label first "day", second "night"
+  const shiftLabelMap = new Map<number, 'day' | 'night'>();
+  const shiftsByDay = new Map<string, Shift[]>();
+  shifts.forEach((s) => {
+    const day = formatInTimeZone(parseISO(s.start_datetime), schedule.timezone, 'yyyy-MM-dd');
+    const group = shiftsByDay.get(day) ?? [];
+    group.push(s);
+    shiftsByDay.set(day, group);
+  });
+  shiftsByDay.forEach((group) => {
+    if (group.length === 2) {
+      shiftLabelMap.set(group[0].id, 'day');
+      shiftLabelMap.set(group[1].id, 'night');
+    }
+  });
 
   // Shifts that start a new calendar day → bolder left border
   const dayBoundaryShiftIds = new Set<number>();
@@ -377,6 +399,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
                       onToggleColumn={() => toggleColumn(shift)}
                       isAdminView={isAdminView}
                       timezone={schedule.timezone}
+                      shiftLabel={shiftLabelMap.get(shift.id)}
                     />
                   </th>
                 );

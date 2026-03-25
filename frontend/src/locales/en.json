@@ -308,7 +308,9 @@
     "fill_in_divider": "Fill-in Members",
     "you_label": "You",
     "virtual_label": "Virtual",
-    "hide_past_label": "Today onwards"
+    "hide_past_label": "Today onwards",
+    "shift_day": "Day",
+    "shift_night": "Night"
   },
   "advanced_modal": {
     "title": "Advanced Schedule Settings",
