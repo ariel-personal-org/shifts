@@ -310,7 +310,9 @@
     "virtual_label": "Virtual",
     "hide_past_label": "Today onwards",
     "shift_day": "Day",
-    "shift_night": "Night"
+    "shift_night": "Night",
+    "save_failed": "Save failed — please try again",
+    "retry": "Retry"
   },
   "advanced_modal": {
     "title": "Advanced Schedule Settings",

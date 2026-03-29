@@ -114,6 +114,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, ShiftState>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   // Select mode — derived from whether any cells are selected
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
@@ -169,17 +170,18 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError(false);
     try {
-      await Promise.all(
-        Object.entries(pendingChanges).map(([key, state]) => {
-          const [shiftId, userId] = key.split(':').map(Number);
-          return schedulesApi.setShiftState(schedule.id, shiftId, userId, state);
-        })
-      );
+      const changes = Object.entries(pendingChanges).map(([key, state]) => {
+        const [shiftId, userId] = key.split(':').map(Number);
+        return { shiftId, userId, state };
+      });
+      await schedulesApi.bulkSetShiftState(schedule.id, changes);
       setPendingChanges({});
       await queryClient.invalidateQueries({ queryKey: ['grid', schedule.id] });
     } catch (err) {
       console.error('Failed to save changes', err);
+      setSaveError(true);
     } finally {
       setIsSaving(false);
     }
@@ -188,6 +190,7 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
   const handleDiscard = () => {
     setPendingChanges({});
     setEditingCell(null);
+    setSaveError(false);
   };
 
   // ─── Single-cell edit ────────────────────────────────────────────────────────
@@ -338,11 +341,13 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
               </button>
             </div>
           ) : hasPendingChanges ? (
-            /* ── Pending changes: amber bar ── */
-            <div className="flex-1 flex items-center gap-3 bg-amber-500 text-white rounded-xl px-4 shadow-md">
+            /* ── Pending changes: amber bar (red on error) ── */
+            <div className={`flex-1 flex items-center gap-3 ${saveError ? 'bg-red-500' : 'bg-amber-500'} text-white rounded-xl px-4 shadow-md`}>
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm font-semibold whitespace-nowrap">
-                {pendingCount !== 1 ? t('grid.unsaved_other', { count: pendingCount }) : t('grid.unsaved_one', { count: pendingCount })}
+                {saveError
+                  ? t('grid.save_failed')
+                  : pendingCount !== 1 ? t('grid.unsaved_other', { count: pendingCount }) : t('grid.unsaved_one', { count: pendingCount })}
               </span>
               <div className="flex-1" />
               <button
@@ -355,9 +360,9 @@ export default function ScheduleGrid({ data, isAdminView = false, scrollRef }: S
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="text-xs font-bold bg-white text-amber-600 hover:bg-amber-50 px-3 py-1 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
+                className={`text-xs font-bold bg-white ${saveError ? 'text-red-600 hover:bg-red-50' : 'text-amber-600 hover:bg-amber-50'} px-3 py-1 rounded-lg transition-colors disabled:opacity-50 shadow-sm`}
               >
-                {isSaving ? t('grid.saving') : t('grid.save_changes')}
+                {isSaving ? t('grid.saving') : saveError ? t('grid.retry') : t('grid.save_changes')}
               </button>
             </div>
           ) : null}

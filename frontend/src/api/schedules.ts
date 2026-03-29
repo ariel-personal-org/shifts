@@ -59,6 +59,16 @@ export const schedulesApi = {
     );
     return data;
   },
+  bulkSetShiftState: async (
+    scheduleId: number,
+    changes: Array<{ shiftId: number; userId: number; state: 'in_shift' | 'available' | 'home' }>
+  ): Promise<{ ok: boolean; updated: number }> => {
+    const { data } = await api.put(
+      `/api/schedules/${scheduleId}/bulk-state`,
+      { changes }
+    );
+    return data;
+  },
   advancedUpdate: async (
     id: number,
     updates: { cycle_start_time?: string; shift_duration_hours?: number }
